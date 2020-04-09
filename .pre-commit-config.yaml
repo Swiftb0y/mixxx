@@ -73,6 +73,17 @@ repos:
     - manual
 - repo: local
   hooks:
+  - id: typescript
+    name: typescript
+    entry: tsc --noEmit --allowJs --checkJS
+    args: [--typeRoots, res/controllers/typings]
+    stages:
+    - commit
+    - manual
+    language: node
+    files: \.(js)$
+    additional_dependencies:
+    - typescript
   - id: clang-format
     name: clang-format
     entry: git clang-format
