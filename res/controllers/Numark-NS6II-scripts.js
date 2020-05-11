@@ -242,6 +242,73 @@ NS6II.hotcue_colors = {
     8: NS6II.colors.white,
 };
 
+NS6II.hotcueColorMapper = new ColorMapper({
+    0x000000: 0,
+    0x2B3479: 1,
+    0x201C9C: 2,
+    0x3459F0: 3,
+    0x366E31: 4,
+    0x009C94: 5,
+    0x347CE4: 6,
+    0x0068FF: 7,
+    0x00BE00: 8,
+    0x54C978: 9,
+    0x40D9A0: 10,
+    0x0000FF: 11,
+    0x00D901: 12,
+    0x2CD969: 13,
+    0x61FF64: 14,
+    0x00D9D9: 15,
+    0x630000: 16,
+    0x7E0081: 17,
+    0x003B6C: 18,
+    0x005CAC: 19,
+    0x8C9300: 20,
+    0x828B8B: 21,
+    0x6166BE: 22,
+    0x0000D9: 23,
+    0x6CA811: 24,
+    0x58FB79: 25,
+    0x009C9C: 26,
+    0x0066D3: 27,
+    0x00FF68: 28,
+    0x00FF79: 29,
+    0x00D98C: 30,
+    0x00D9D9: 31,
+    0xA00000: 32,
+    0x98004C: 33,
+    0x96009B: 34,
+    0x0059AC: 35,
+    0xBC7300: 36,
+    0xC98E8B: 37,
+    0xA169A8: 38,
+    0x006C9B: 39,
+    0xB1AE00: 40,
+    0xA9B400: 41,
+    0xB6B6B6: 42,
+    0x468BB6: 43,
+    0x00D93E: 44,
+    0x5ED961: 45,
+    0x86FF8C: 46,
+    0x00D9D9: 47,
+    0xD90000: 48,
+    0xD95B5E: 49,
+    0xC04076: 50,
+    0xD951D9: 51,
+    0xF05100: 52,
+    0xFF6900: 53,
+    0xD65E89: 54,
+    0xD900D9: 55,
+    0xF99C00: 56,
+    0xD9D9D9: 57,
+    0xD18C91: 58,
+    0xD994D9: 59,
+    0xE0FF00: 60,
+    0xE1FF00: 61,
+    0xDEEE80: 62,
+    0xFFFFFF: 63
+})
+
 NS6II.serato_syx_prefix = [0x00, 0x20, 0x7f];
 NS6II.controller_status_sysex = [0xF0, 0x00, 0x20, 0x7F, 0x03, 0x01, 0xF7];
 
@@ -722,7 +789,7 @@ NS6II.cont_pm_hotcue_regular = function(channel_offset) {
             midi: [0x90 + channel_offset, 0x13 + i],
             // shift: [0x94+channel_offset,0x1b+i],
             number: i,
-            colors: NS6II.hotcue_colors,
+            colorMapper: NS6II.hotcueColorMapper,
             off: NS6II.colors.off,
         });
     }
@@ -748,7 +815,7 @@ NS6II.cont_pm_hotcue_auto = function(channel_offset) {
         this.pads[i] = new components.HotcueButton({
             midi: [0x90 + channel_offset, 0x13 + i],
             number: i,
-            colors: NS6II.hotcue_colors,
+            colorMapper: NS6II.hotcueColorMapper,
         });
     }
     this.param_left = new components.Button({
