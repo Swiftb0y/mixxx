@@ -21,7 +21,6 @@
 
 #define BPM_RANGE_START "BPMRangeStart"
 #define BPM_RANGE_END "BPMRangeEnd"
-#define BPM_ABOVE_RANGE_ENABLED "BPMAboveRangeEnabled"
 
 class BeatDetectionSettings {
   public:
@@ -29,9 +28,6 @@ class BeatDetectionSettings {
 
     DEFINE_PREFERENCE_HELPERS(BpmDetectionEnabled, bool,
                               BPM_CONFIG_KEY, BPM_DETECTION_ENABLED, true);
-
-    DEFINE_PREFERENCE_HELPERS(AllowBpmAboveRange, bool,
-                              BPM_CONFIG_KEY, BPM_ABOVE_RANGE_ENABLED, true);
 
     DEFINE_PREFERENCE_HELPERS(BpmRangeStart, int, BPM_CONFIG_KEY, BPM_RANGE_START, 70);
 
@@ -50,28 +46,13 @@ class BeatDetectionSettings {
                               BPM_CONFIG_KEY, BPM_FAST_ANALYSIS_ENABLED, false);
 
     QString getBeatPluginId() const {
-        QString plugin_id = m_pConfig->getValue<QString>(ConfigKey(
-            VAMP_CONFIG_KEY, VAMP_ANALYZER_BEAT_PLUGIN_ID));
-        if (plugin_id.isEmpty()) {
-            return getBeatPluginIdDefault();
-        }
-        // TODO(rryan): Update to new plugins based on VAMP ones.
-        return plugin_id;
+        return m_pConfig->getValue<QString>(ConfigKey(
+                VAMP_CONFIG_KEY, VAMP_ANALYZER_BEAT_PLUGIN_ID));
     }
     void setBeatPluginId(const QString& plugin_id) {
         m_pConfig->setValue(
-            ConfigKey(VAMP_CONFIG_KEY, VAMP_ANALYZER_BEAT_PLUGIN_ID),
-            plugin_id);
-    }
-    QString getBeatPluginIdDefault() const {
-        return "qm-tempotracker";
-    }
-    void setBeatPluginIdDefault() {
-        setBeatPluginId(getBeatPluginIdDefault());
-    }
-
-    bool isFixedTempoSupportedByPlugin(const QString& pluginId) {
-        return pluginId == "qm-tempotracker";
+                ConfigKey(VAMP_CONFIG_KEY, VAMP_ANALYZER_BEAT_PLUGIN_ID),
+                plugin_id);
     }
 
   private:

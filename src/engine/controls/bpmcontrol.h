@@ -15,6 +15,9 @@ class ControlPushButton;
 class EngineBuffer;
 class SyncControl;
 
+/// BpmControl is an EngineControl that manages the bpm and beat distance of
+/// tracks.  It understands the tempo of the underlying track and the musical
+/// position of the playhead.
 class BpmControl : public EngineControl {
     Q_OBJECT
 
@@ -34,6 +37,7 @@ class BpmControl : public EngineControl {
     double calcSyncedRate(double userTweak);
     // Get the phase offset from the specified position.
     double getNearestPositionInPhase(double dThisPosition, bool respectLoops, bool playing);
+    double getBeatMatchPosition(double dThisPosition, bool respectLoops, bool playing);
     double getPhaseOffset(double dThisPosition);
     double getBeatDistance(double dThisPosition) const;
 
@@ -70,10 +74,12 @@ class BpmControl : public EngineControl {
     // Example: shortestPercentageChange(0.99, 0.01) == 0.02
     static double shortestPercentageChange(const double& current_percentage,
                                            const double& target_percentage);
+    double getRateRatio() const;
+    void notifySeek(double dNewPlaypos) override;
     void trackLoaded(TrackPointer pNewTrack) override;
+    void trackBeatsUpdated(BeatsPointer pBeats) override;
 
   private slots:
-    void slotFileBpmChanged(double);
     void slotAdjustBeatsFaster(double);
     void slotAdjustBeatsSlower(double);
     void slotTranslateBeatsEarlier(double);
@@ -85,7 +91,6 @@ class BpmControl : public EngineControl {
     void slotBpmTap(double);
     void slotUpdateRateSlider(double v = 0.0);
     void slotUpdateEngineBpm(double v = 0.0);
-    void slotUpdatedTrackBeats();
     void slotBeatsTranslate(double);
     void slotBeatsTranslateMatchAlignment(double);
 
@@ -97,8 +102,7 @@ class BpmControl : public EngineControl {
         return toSynchronized(getSyncMode());
     }
     bool syncTempo();
-    double calcSyncAdjustment(double my_percentage, bool userTweakingSync);
-    double calcRateRatio() const;
+    double calcSyncAdjustment(bool userTweakingSync);
 
     friend class SyncControl;
 
@@ -106,23 +110,18 @@ class BpmControl : public EngineControl {
     ControlProxy* m_pPlayButton;
     QAtomicInt m_oldPlayButton;
     ControlProxy* m_pReverseButton;
-    ControlProxy* m_pRateSlider;
+    ControlProxy* m_pRateRatio;
     ControlObject* m_pQuantize;
-    ControlProxy* m_pRateRange;
-    ControlProxy* m_pRateDir;
 
     // ControlObjects that come from QuantizeControl
     QScopedPointer<ControlProxy> m_pNextBeat;
     QScopedPointer<ControlProxy> m_pPrevBeat;
-    QScopedPointer<ControlProxy> m_pClosestBeat;
 
     // ControlObjects that come from LoopingControl
     ControlProxy* m_pLoopEnabled;
     ControlProxy* m_pLoopStartPosition;
     ControlProxy* m_pLoopEndPosition;
 
-    // The current loaded file's detected BPM
-    ControlObject* m_pFileBpm;
     // The average bpm around the current playposition;
     ControlObject* m_pLocalBpm;
     ControlPushButton* m_pAdjustBeatsFaster;
@@ -153,17 +152,15 @@ class BpmControl : public EngineControl {
     QAtomicInt m_resetSyncAdjustment;
     ControlProxy* m_pSyncMode;
 
-    TapFilter m_tapFilter; // threadsave
+    TapFilter m_tapFilter; // threadsafe
 
     // used in the engine thread only
     double m_dSyncInstantaneousBpm;
     double m_dLastSyncAdjustment;
+    bool m_dUserTweakingSync;
 
-    // objects below are written from an engine worker thread
-    TrackPointer m_pTrack;
+    // m_pBeats is written from an engine worker thread
     BeatsPointer m_pBeats;
-
-    const QString m_sGroup;
 
     FRIEND_TEST(EngineSyncTest, UserTweakBeatDistance);
 };

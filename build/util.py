@@ -71,7 +71,7 @@ def export_source(source, dest):
 
 
 def get_git_revision():
-    return len(os.popen("git log --pretty=oneline --first-parent").read().splitlines())
+    return os.popen("git rev-list HEAD --first-parent --count").read().strip()
 
 
 def get_git_modified():
@@ -113,7 +113,7 @@ def get_build_dir(platformString, bitwidth):
 def get_mixxx_version():
     """Get Mixxx version number from defs_version.h"""
     # have to handle out-of-tree building, that's why the '#' :(
-    defs = Script.File('#src/defs_version.h')
+    defs = Script.File('#src/_version.h')
     version = ""
 
     for line in open(str(defs)).readlines():

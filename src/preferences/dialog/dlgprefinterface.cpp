@@ -18,6 +18,8 @@
 #include "defs_urls.h"
 #include "util/autohidpi.h"
 
+using mixxx::skin::SkinManifest;
+
 DlgPrefInterface::DlgPrefInterface(QWidget * parent, MixxxMainWindow * mixxx,
                                  SkinLoader* pSkinLoader,
                                  UserSettingsPointer pConfig)
@@ -70,9 +72,12 @@ DlgPrefInterface::DlgPrefInterface(QWidget * parent, MixxxMainWindow * mixxx,
     warningLabel->setText(warningString);
 
     ComboBoxSkinconf->clear();
-    // align left edge of preview image with comboboxes
-    skinPreviewLabel->setStyleSheet("QLabel { margin-left: 2px; }");
+    // align left edge of preview image and skin description with comboboxes
+    skinPreviewLabel->setStyleSheet("QLabel { margin-left: 4px; }");
     skinPreviewLabel->setText("");
+    skinDescriptionText->setStyleSheet("QLabel { margin-left: 2px; }");
+    skinDescriptionText->setText("");
+    skinDescriptionText->hide();
 
     QList<QDir> skinSearchPaths = m_pSkinLoader->getSkinSearchPaths();
     QList<QFileInfo> skins;
@@ -103,6 +108,7 @@ DlgPrefInterface::DlgPrefInterface(QWidget * parent, MixxxMainWindow * mixxx,
             } else {
                 warningLabel->show();
             }
+            slotSetSkinDescription(m_skin);
         }
         index++;
     }
@@ -110,42 +116,9 @@ DlgPrefInterface::DlgPrefInterface(QWidget * parent, MixxxMainWindow * mixxx,
     connect(ComboBoxSkinconf, SIGNAL(activated(int)), this, SLOT(slotSetSkin(int)));
     connect(ComboBoxSchemeconf, SIGNAL(activated(int)), this, SLOT(slotSetScheme(int)));
 
-
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    AutoHiDpi autoHiDpi;
-    m_dScaleFactorAuto = autoHiDpi.getScaleFactor();
-    m_dScaleFactor = m_dScaleFactorAuto;
-    if (m_dScaleFactor > 0) {
-        // we got a valid auto scale factor
-        bool scaleFactorAuto = m_pConfig->getValue(
-                ConfigKey("[Config]", "ScaleFactorAuto"), true);
-        checkBoxScaleFactorAuto->setChecked(scaleFactorAuto);
-        if (scaleFactorAuto) {
-            spinBoxScaleFactor->setEnabled(false);
-            m_pConfig->setValue(
-                    ConfigKey("[Config]", "ScaleFactor"), m_dScaleFactorAuto);
-        } else {
-            m_dScaleFactor = m_pConfig->getValue(
-                        ConfigKey("[Config]", "ScaleFactor"), 1.0);
-        }
-    } else {
-        checkBoxScaleFactorAuto->setEnabled(false);
-        m_dScaleFactor = m_pConfig->getValue(
-                    ConfigKey("[Config]", "ScaleFactor"), 1.0);
-    }
-
-    connect(checkBoxScaleFactorAuto, SIGNAL(toggled(bool)),
-            this, SLOT(slotSetScaleFactorAuto(bool)));
-    connect(spinBoxScaleFactor, SIGNAL(valueChanged(double)),
-            this, SLOT(slotSetScaleFactor(double)));
-
-#else
     checkBoxScaleFactorAuto->hide();
     spinBoxScaleFactor->hide();
     labelScaleFactor->hide();
-#endif
-
 
     //
     // Start in fullscreen mode
@@ -330,6 +303,18 @@ void DlgPrefInterface::slotSetScheme(int) {
     skinPreviewLabel->setPixmap(m_pSkinLoader->getSkinPreview(m_skin, m_colorScheme));
 }
 
+void DlgPrefInterface::slotSetSkinDescription(QString skin) {
+    SkinManifest manifest = LegacySkinParser::getSkinManifest(
+            LegacySkinParser::openSkin(m_pSkinLoader->getSkinPath(skin)));
+    QString description = QString::fromStdString(manifest.description());
+    if (manifest.has_description() && !description.isEmpty()) {
+        skinDescriptionText->show();
+        skinDescriptionText->setText(description);
+    } else {
+        skinDescriptionText->hide();
+    }
+}
+
 void DlgPrefInterface::slotSetSkin(int) {
     QString newSkin = ComboBoxSkinconf->currentText();
     if (newSkin != m_skin) {
@@ -338,7 +323,9 @@ void DlgPrefInterface::slotSetSkin(int) {
         checkSkinResolution(ComboBoxSkinconf->currentText())
             ? warningLabel->hide() : warningLabel->show();
         slotUpdateSchemes();
+        slotSetSkinDescription(m_skin);
     }
+
     skinPreviewLabel->setPixmap(m_pSkinLoader->getSkinPreview(newSkin, m_colorScheme));
 }
 

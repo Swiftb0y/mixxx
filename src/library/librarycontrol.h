@@ -10,14 +10,16 @@
 class ControlObject;
 class ControlPushButton;
 class Library;
+class LibraryControl;
 class WLibrary;
 class WLibrarySidebar;
+class WSearchLineEdit;
 class KeyboardEventFilter;
 
 class LoadToGroupController : public QObject {
     Q_OBJECT
   public:
-    LoadToGroupController(QObject* pParent, const QString& group);
+    LoadToGroupController(LibraryControl* pParent, const QString& group);
     virtual ~LoadToGroupController();
 
   signals:
@@ -39,12 +41,21 @@ class LibraryControl : public QObject {
     LibraryControl(Library* pLibrary);
     virtual ~LibraryControl();
 
-    void bindWidget(WLibrary* pLibrary, KeyboardEventFilter* pKeyboard);
+    void bindLibraryWidget(WLibrary* pLibrary, KeyboardEventFilter* pKeyboard);
     void bindSidebarWidget(WLibrarySidebar* pLibrarySidebar);
+    void bindSearchboxWidget(WSearchLineEdit* pSearchbox);
+
+  signals:
+    void clearSearch();
+
+  public slots:
+    // Deprecated navigation slots
+    void slotLoadSelectedTrackToGroup(QString group, bool play);
 
   private slots:
     void libraryWidgetDeleted();
     void sidebarWidgetDeleted();
+    void searchboxWidgetDeleted();
 
     void slotMoveUp(double);
     void slotMoveDown(double);
@@ -60,8 +71,10 @@ class LibraryControl : public QObject {
     void slotMoveFocus(double);
     void slotGoToItem(double v);
 
+    void slotTrackColorPrev(double v);
+    void slotTrackColorNext(double v);
+
     // Deprecated navigation slots
-    void slotLoadSelectedTrackToGroup(QString group, bool play);
     void slotSelectNextTrack(double v);
     void slotSelectPrevTrack(double v);
     void slotSelectTrack(double v);
@@ -77,6 +90,9 @@ class LibraryControl : public QObject {
     void slotNumDecksChanged(double v);
     void slotNumSamplersChanged(double v);
     void slotNumPreviewDecksChanged(double v);
+
+    void slotSortColumn(double v);
+    void slotSortColumnToggle(double v);
 
     void slotFontSize(double v);
     void slotIncrementFontSize(double v);
@@ -117,6 +133,15 @@ class LibraryControl : public QObject {
     std::unique_ptr<ControlObject> m_pAutoDjAddTop;
     std::unique_ptr<ControlObject> m_pAutoDjAddBottom;
 
+    // Controls to sort the track view
+    std::unique_ptr<ControlEncoder> m_pSortColumn;
+    std::unique_ptr<ControlEncoder> m_pSortColumnToggle;
+    std::unique_ptr<ControlPushButton> m_pSortOrder;
+
+    // Controls to change track color
+    std::unique_ptr<ControlPushButton> m_pTrackColorPrev;
+    std::unique_ptr<ControlPushButton> m_pTrackColorNext;
+
     // Font sizes
     std::unique_ptr<ControlPushButton> m_pFontSizeIncrement;
     std::unique_ptr<ControlPushButton> m_pFontSizeDecrement;
@@ -135,6 +160,7 @@ class LibraryControl : public QObject {
     // Library widgets
     WLibrary* m_pLibraryWidget;
     WLibrarySidebar* m_pSidebarWidget;
+    WSearchLineEdit* m_pSearchbox;
 
     // Other variables
     ControlProxy m_numDecks;

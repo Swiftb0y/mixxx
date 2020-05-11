@@ -66,10 +66,11 @@ Variables:
         <SizePolicy>f,min</SizePolicy>
         <Children>
           <SliderComposed><!-- Volume slider -->
+            <Size>34f,103f</Size>
             <ObjectName>VolumeSlider</ObjectName>
             <TooltipId>channel_volume</TooltipId>
-            <Slider>knobs_sliders/volume_scale.svg</Slider>
-            <Handle>knobs_sliders/volume_handle.svg</Handle>
+            <Slider scalemode="STRETCH_ASPECT">knobs_sliders/volume_scale.svg</Slider>
+            <Handle scalemode="STRETCH_ASPECT">knobs_sliders/volume_handle.svg</Handle>
             <Horizontal>false</Horizontal>
             <Connection>
               <ConfigKey><Variable name="group"/>,volume</ConfigKey>
@@ -97,19 +98,15 @@ Variables:
         <Children>
           <Template src="skin:vumeter_mixer.xml"/>
 
-          <WidgetGroup><Size>1min,5f</Size></WidgetGroup>
+          <WidgetGroup><Size>1min,0me</Size></WidgetGroup>
 
           <WidgetGroup><!-- Pfl button, isolated with a 'gap' -->
             <ObjectName>PflBoxLeft</ObjectName>
             <Size>25f,25f</Size>
             <Layout>stacked</Layout>
             <Children>
-              <!-- index 0 due to bug -->
-              <WidgetGroup><Size>0f,0f</Size></WidgetGroup>
-
               <!-- Greyed out if no headphone device is configured -->
               <Template src="skin:pfl_cover.xml"/>
-
               <Template src="skin:button_2state.xml">
                 <SetVariable name="TooltipId">pfl</SetVariable>
                 <SetVariable name="ObjectName">PflButton</SetVariable>

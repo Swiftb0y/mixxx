@@ -141,13 +141,20 @@ class EngineBuffer : public EngineObject {
 
     QString getGroup();
     bool isTrackLoaded();
+    // return true if a seek is currently cueued but not yet processed, false otherwise
+    // if no seek was queued, the seek position is set to -1
+    bool getQueuedSeekPosition(double* pSeekPosition);
     TrackPointer getLoadedTrack() const;
+
+    bool isReverse();
 
     double getExactPlayPos();
     double getVisualPlayPos();
     double getTrackSamples();
 
     void collectFeatures(GroupFeatureState* pGroupFeatures) const;
+
+    double getRateRatio() const;
 
     // For dependency injection of readers.
     //void setReader(CachingReader* pReader);
@@ -201,6 +208,7 @@ class EngineBuffer : public EngineObject {
                              QString reason);
     // Fired when passthrough mode is enabled or disabled.
     void slotPassthroughChanged(double v);
+    void slotUpdatedTrackBeats();
 
   private:
     // Add an engine control to the EngineBuffer
@@ -230,7 +238,7 @@ class EngineBuffer : public EngineObject {
     void seekCloneBuffer(EngineBuffer* pOtherBuffer);
 
     // Reset buffer playpos and set file playpos.
-    void setNewPlaypos(double playpos, bool adjustingPhase);
+    void setNewPlaypos(double playpos);
 
     void processSyncRequests();
     void processSeek(bool paused);
@@ -243,6 +251,8 @@ class EngineBuffer : public EngineObject {
     // Holds the name of the control group
     QString m_group;
     UserSettingsPointer m_pConfig;
+
+    friend class CueControlTest;
 
     LoopingControl* m_pLoopingControl; // used for testes
     FRIEND_TEST(LoopingControlTest, LoopScale_HalvesLoop);
@@ -364,6 +374,7 @@ class EngineBuffer : public EngineObject {
     FRIEND_TEST(EngineBufferTest, VinylScalerRampZero);
     FRIEND_TEST(EngineBufferTest, ReadFadeOut);
     FRIEND_TEST(EngineBufferTest, RateTempTest);
+    FRIEND_TEST(EngineBufferTest, RatePermTest);
     EngineBufferScale* m_pScaleVinyl;
     // The keylock engine is configurable, so it could flip flop between
     // ScaleST and ScaleRB during a single callback.

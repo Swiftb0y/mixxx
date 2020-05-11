@@ -267,6 +267,9 @@ const CSAMPLE* EngineMaster::getSidechainBuffer() const {
 }
 
 void EngineMaster::processChannels(int iBufferSize) {
+    // Update internal master sync rate.
+    m_pMasterSync->onCallbackStart(m_iSampleRate, m_iBufferSize);
+
     m_activeBusChannels[EngineChannel::LEFT].clear();
     m_activeBusChannels[EngineChannel::CENTER].clear();
     m_activeBusChannels[EngineChannel::RIGHT].clear();
@@ -274,7 +277,7 @@ void EngineMaster::processChannels(int iBufferSize) {
     m_activeTalkoverChannels.clear();
     m_activeChannels.clear();
 
-    ScopedTimer timer("EngineMaster::processChannels");
+    //ScopedTimer timer("EngineMaster::processChannels");
     EngineChannel* pMasterChannel = m_pMasterSync->getMaster();
     // Reserve the first place for the master channel which
     // should be processed first
@@ -361,6 +364,10 @@ void EngineMaster::processChannels(int iBufferSize) {
         }
     }
 
+    // Do internal master sync post-processing before the other
+    // channels.
+    m_pMasterSync->onCallbackEnd(m_iSampleRate, m_iBufferSize);
+
     // After all the engines have been processed, trigger post-processing
     // which ensures that all channels are updating certain values at the
     // same point in time.  This prevents sync from failing depending on
@@ -377,7 +384,7 @@ void EngineMaster::process(const int iBufferSize) {
         QThread::currentThread()->setObjectName("Engine");
         haveSetName = true;
     }
-    Trace t("EngineMaster::process");
+    //Trace t("EngineMaster::process");
 
     bool masterEnabled = m_pMasterEnabled->get();
     bool boothEnabled = m_pBoothEnabled->get();
@@ -393,12 +400,8 @@ void EngineMaster::process(const int iBufferSize) {
         m_pEngineEffectsManager->onCallbackStart();
     }
 
-    // Update internal master sync rate.
-    m_pMasterSync->onCallbackStart(m_iSampleRate, m_iBufferSize);
-    // Prepare each channel for output
+    // Prepare all channels for output
     processChannels(m_iBufferSize);
-    // Do internal master sync post-processing
-    m_pMasterSync->onCallbackEnd(m_iSampleRate, m_iBufferSize);
 
     // Compute headphone mix
     // Head phone left/right mix

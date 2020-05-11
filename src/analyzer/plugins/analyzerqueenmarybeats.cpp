@@ -9,17 +9,17 @@
 
 namespace mixxx {
 namespace {
-// These are the preferred window/step sizes from the BeatTrack VAMP plugin.
-constexpr size_t kWindowSize = 1024;
-constexpr size_t kStepSize = 512;
+// stepsize should be equivalent to ~10ms and this constant (11.61ms) make the number 
+// of samples an exact power of 2 for 22.1k, 44.1k, and very close to, for 96k and 192k
+constexpr float kStepSecs = 0.01161; 
 
-DFConfig makeDetectionFunctionConfig() {
+DFConfig makeDetectionFunctionConfig(int stepSize, int windowSize) {
     // These are the defaults for the VAMP beat tracker plugin we used in Mixxx
     // 2.0.
     DFConfig config;
-    config.DFType = DF_SPECDIFF;
-    config.stepSize = kStepSize;
-    config.frameLength = kWindowSize;
+    config.DFType = DF_COMPLEXSD;
+    config.stepSize = stepSize;
+    config.frameLength = windowSize;
     config.dbRise = 3;
     config.adaptiveWhitening = 0;
     config.whiteningRelaxCoeff = -1;
@@ -27,7 +27,7 @@ DFConfig makeDetectionFunctionConfig() {
     return config;
 }
 
-}  // namespace
+} // namespace
 
 AnalyzerQueenMaryBeats::AnalyzerQueenMaryBeats()
         : m_iSampleRate(0) {
@@ -39,21 +39,24 @@ AnalyzerQueenMaryBeats::~AnalyzerQueenMaryBeats() {
 bool AnalyzerQueenMaryBeats::initialize(int samplerate) {
     m_detectionResults.clear();
     m_iSampleRate = samplerate;
+    // These are the preferred window/step sizes from the BeatTrack VAMP
+    m_stepSize = int(m_iSampleRate * kStepSecs + 0.0001);
+    m_windowSize = m_stepSize * 2;
     m_pDetectionFunction = std::make_unique<DetectionFunction>(
-        makeDetectionFunctionConfig());
+            makeDetectionFunctionConfig(m_stepSize, m_windowSize));
+    qDebug() << "input sample rate is " << m_iSampleRate << ", step size is " << m_stepSize;
 
     m_helper.initialize(
-        kWindowSize, kStepSize, [this](double* pWindow, size_t) {
-            // TODO(rryan) reserve?
-            m_detectionResults.push_back(
-                m_pDetectionFunction->processTimeDomain(pWindow));
-            return true;
-        });
+            m_windowSize, m_stepSize, [this](double* pWindow, size_t) {
+                // TODO(rryan) reserve?
+                m_detectionResults.push_back(
+                        m_pDetectionFunction->processTimeDomain(pWindow));
+                return true;
+            });
     return true;
 }
 
-bool AnalyzerQueenMaryBeats::process(const CSAMPLE* pIn, const int iLen) {
-    DEBUG_ASSERT(iLen == kAnalysisSamplesPerBlock);
+bool AnalyzerQueenMaryBeats::processSamples(const CSAMPLE* pIn, const int iLen) {
     DEBUG_ASSERT(iLen % kAnalysisChannels == 0);
     if (!m_pDetectionFunction) {
         return false;
@@ -63,8 +66,7 @@ bool AnalyzerQueenMaryBeats::process(const CSAMPLE* pIn, const int iLen) {
 }
 
 bool AnalyzerQueenMaryBeats::finalize() {
-    // TODO(rryan) if iLen is less than frame size, pad with zeros. Do we need
-    // flush support?
+    m_helper.finalize();
 
     int nonZeroCount = m_detectionResults.size();
     while (nonZeroCount > 0 && m_detectionResults.at(nonZeroCount - 1) <= 0.0) {
@@ -74,35 +76,31 @@ bool AnalyzerQueenMaryBeats::finalize() {
     std::vector<double> df;
     std::vector<double> beatPeriod;
     std::vector<double> tempi;
+    const auto required_size = std::max(0, nonZeroCount - 2);
+    df.reserve(required_size);
+    beatPeriod.reserve(required_size);
 
-    df.reserve(nonZeroCount);
-    beatPeriod.reserve(nonZeroCount);
-
-    // NOTE(rryan): The VAMP plugin skipped the first 2 detection function
-    // results so I do as well. Not sure why.
+    // skip first 2 results as it might have detect noise as onset
+    // that's how vamp does and seems works best this way
     for (int i = 2; i < nonZeroCount; ++i) {
         df.push_back(m_detectionResults.at(i));
         beatPeriod.push_back(0.0);
     }
 
-    if (df.empty()) {
-        return false;
-    }
-
-    TempoTrackV2 tt(m_iSampleRate, kStepSize);
+    TempoTrackV2 tt(m_iSampleRate, m_stepSize);
     tt.calculateBeatPeriod(df, beatPeriod, tempi);
 
     std::vector<double> beats;
     tt.calculateBeats(df, beatPeriod, beats);
 
-    m_resultBeats.resize(beats.size());
-    double* result = (double*)&m_resultBeats.at(0);
+    m_resultBeats.reserve(beats.size());
     for (size_t i = 0; i < beats.size(); ++i) {
-        result[i] = beats[i] * kStepSize;
+        double result = (beats.at(i) * m_stepSize) - m_stepSize / 2;
+        m_resultBeats.push_back(result);
     }
 
     m_pDetectionFunction.reset();
     return true;
 }
 
-}  // namespace mixxx
+} // namespace mixxx

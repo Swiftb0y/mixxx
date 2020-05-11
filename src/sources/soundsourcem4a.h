@@ -4,6 +4,8 @@
 #include "sources/soundsource.h"
 #include "sources/soundsourceprovider.h"
 
+#include "sources/libfaadloader.h"
+
 #include "util/readaheadsamplebuffer.h"
 
 #ifdef __MP4V2__
@@ -12,13 +14,19 @@
 #include <mp4.h>
 #endif
 
-#include <neaacdec.h>
-
 #include <vector>
 
 namespace mixxx {
 
-class SoundSourceM4A: public SoundSource {
+/// Decode M4A (AAC in MP4) files using FAAD2.
+///
+/// NOTE(2020-05-01): Decoding in version v2.9.1 of the library
+/// is broken and any attempt to open files will fail.
+///
+/// https://github.com/mixxxdj/mixxx/pull/2738
+/// https://github.com/knik0/faad2/commit/a8dc3f8ce67f4069cfa4d5cf0fcc2c6e8ef2c2aa
+/// https://github.com/knik0/faad2/commit/920ec985a74c6f88fe507181df07a0cd7e51d519
+class SoundSourceM4A : public SoundSource {
   public:
     explicit SoundSourceM4A(const QUrl& url);
     ~SoundSourceM4A() override;
@@ -54,17 +62,19 @@ class SoundSourceM4A: public SoundSource {
 
     OpenParams m_openParams;
 
-    NeAACDecHandle m_hDecoder;
+    LibFaadLoader::Handle m_hDecoder;
     SINT m_numberOfPrefetchSampleBlocks;
     MP4SampleId m_curSampleBlockId;
 
     ReadAheadSampleBuffer m_sampleBuffer;
 
     SINT m_curFrameIndex;
+
+    LibFaadLoader* m_pFaad;
 };
 
-class SoundSourceProviderM4A: public SoundSourceProvider {
-public:
+class SoundSourceProviderM4A : public SoundSourceProvider {
+  public:
     QString getName() const override;
 
     QStringList getSupportedFileExtensions() const override;

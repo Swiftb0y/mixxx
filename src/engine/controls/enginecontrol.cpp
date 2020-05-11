@@ -31,6 +31,10 @@ void EngineControl::trackLoaded(TrackPointer pNewTrack) {
     Q_UNUSED(pNewTrack);
 }
 
+void EngineControl::trackBeatsUpdated(BeatsPointer pBeats) {
+    Q_UNUSED(pBeats);
+}
+
 void EngineControl::hintReader(HintVector*) {
 }
 
@@ -85,9 +89,10 @@ void EngineControl::seek(double sample) {
     }
 }
 
-void EngineControl::notifySeek(double dNewPlaypos, bool adjustingPhase) {
-    Q_UNUSED(dNewPlaypos);
-    Q_UNUSED(adjustingPhase);
+void EngineControl::notifySeek(double dNewPlaypos) {
+    SampleOfTrack sot = m_sampleOfTrack.getValue();
+    sot.current = dNewPlaypos;
+    m_sampleOfTrack.setValue(sot);
 }
 
 EngineBuffer* EngineControl::pickSyncTarget() {

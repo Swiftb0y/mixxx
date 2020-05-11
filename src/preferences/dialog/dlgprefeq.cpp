@@ -15,20 +15,22 @@
 *                                                                         *
 ***************************************************************************/
 
-#include <QWidget>
-#include <QString>
-#include <QHBoxLayout>
-
 #include "preferences/dialog/dlgprefeq.h"
-#include "effects/builtin/biquadfullkilleqeffect.h"
-#include "effects/builtin/filtereffect.h"
-#include "effects/effectslot.h"
-#include "engine/filters/enginefilterbessel4.h"
+
+#include <QHBoxLayout>
+#include <QString>
+#include <QWidget>
+
 #include "control/controlobject.h"
 #include "control/controlproxy.h"
-#include "util/math.h"
-#include "mixer/playermanager.h"
+#include "defs_urls.h"
+#include "effects/builtin/biquadfullkilleqeffect.h"
+#include "effects/builtin/filtereffect.h"
 #include "effects/effectrack.h"
+#include "effects/effectslot.h"
+#include "engine/filters/enginefilterbessel4.h"
+#include "mixer/playermanager.h"
+#include "util/math.h"
 
 const QString kConfigKey = "[Mixer Profile]";
 const QString kEnableEqs = "EnableEQs";
@@ -231,10 +233,9 @@ void DlgPrefEQ::slotPopulateDeckEffectSelectors() {
         }
         //: Displayed when no effect is selected
         box->addItem(tr("None"), QVariant(QString("")));
-        if (selectedEffectId.isNull()) {
+        if (selectedEffectId.isEmpty()) {
             currentIndex = availableEQEffects.size(); // selects "None"
-        }
-        if (currentIndex < 0 && !selectedEffectName.isEmpty()) {
+        } else if (currentIndex < 0 && !selectedEffectName.isEmpty() ) {
             // current selection is not part of the new list
             // So we need to add it
             box->addItem(selectedEffectName, QVariant(selectedEffectId));
@@ -261,10 +262,9 @@ void DlgPrefEQ::slotPopulateDeckEffectSelectors() {
         }
         //: Displayed when no effect is selected
         box->addItem(tr("None"), QVariant(QString("")));
-        if (selectedEffectId.isNull()) {
+        if (selectedEffectId.isEmpty()) {
             currentIndex = availableQuickEffects.size(); // selects "None"
-        }
-        if (currentIndex < 0 && !selectedEffectName.isEmpty()) {
+        } else if (currentIndex < 0 && !selectedEffectName.isEmpty()) {
             // current selection is not part of the new list
             // So we need to add it
             box->addItem(selectedEffectName, QVariant(selectedEffectId));
@@ -301,6 +301,10 @@ void DlgPrefEQ::slotSingleEqChecked(int checked) {
     }
 
     applySelections();
+}
+
+QUrl DlgPrefEQ::helpUrl() const {
+    return QUrl(MIXXX_MANUAL_EQ_URL);
 }
 
 void DlgPrefEQ::loadSettings() {
@@ -372,13 +376,13 @@ void DlgPrefEQ::slotResetToDefaults() {
                pCombo->findData(kDefaultQuickEffectId));
     }
     loadSettings();
-    CheckBoxBypass->setChecked(Qt::Unchecked);
-    CheckBoxEqOnly->setChecked(Qt::Checked);
-    CheckBoxSingleEqEffect->setChecked(Qt::Checked);
+    CheckBoxBypass->setChecked(false);
+    CheckBoxEqOnly->setChecked(true);
+    CheckBoxSingleEqEffect->setChecked(true);
     m_bEqAutoReset = false;
-    CheckBoxEqAutoReset->setChecked(Qt::Unchecked);
+    CheckBoxEqAutoReset->setChecked(false);
     m_bGainAutoReset = false;
-    CheckBoxGainAutoReset->setChecked(Qt::Unchecked);
+    CheckBoxGainAutoReset->setChecked(false);
     slotUpdate();
     slotApply();
 }

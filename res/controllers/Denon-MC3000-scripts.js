@@ -3,9 +3,9 @@
  *
  * Written by Bertrand Espern 2012
  *
- * 2012/05/11 V0.995 : first "good" version approuved and tested by me
+ * 2012/05/11 V0.995 : first "good" version approved and tested by me
  *
- * Special Thanks to the Programmers of Mixx and all the contributors
+ * Special Thanks to the Programmers of Mixxx and all the contributors
  *
  * Inspired primarily from Numark Total Control script file 
  *

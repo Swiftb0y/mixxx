@@ -2,6 +2,7 @@
 
 #include "mixxx.h"
 #include "library/library.h"
+#include "library/dao/analysisdao.h"
 #include "preferences/waveformsettings.h"
 #include "waveform/waveformwidgetfactory.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
@@ -89,10 +90,10 @@ DlgPrefWaveform::~DlgPrefWaveform() {
 void DlgPrefWaveform::slotUpdate() {
     WaveformWidgetFactory* factory = WaveformWidgetFactory::instance();
 
-    if (factory->isOpenGLAvailable()) {
+    if (factory->isOpenGlAvailable() || factory->isOpenGlesAvailable()) {
         openGlStatusIcon->setText(factory->getOpenGLVersion());
     } else {
-        openGlStatusIcon->setText(tr("OpenGL not available"));
+        openGlStatusIcon->setText(tr("OpenGL not available") + ": " + factory->getOpenGLVersion());
     }
 
     WaveformWidgetType::Type currentType = factory->getType();
@@ -196,6 +197,14 @@ void DlgPrefWaveform::slotSetWaveformType(int index) {
         return;
     }
     WaveformWidgetFactory::instance()->setWidgetTypeFromHandle(index);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0) && defined __WINDOWS__
+    // This regenerates the waveforms twice because of a bug found on Windows
+    // where the first one fails.
+    // The problem is that the window of the widget thinks that it is not exposed.
+    // (https://doc.qt.io/qt-5/qwindow.html#exposeEvent )
+    // TODO: Remove this when it has been fixed upstream.
+    WaveformWidgetFactory::instance()->setWidgetTypeFromHandle(index, true);
+#endif
 }
 
 void DlgPrefWaveform::slotSetWaveformOverviewType(int index) {

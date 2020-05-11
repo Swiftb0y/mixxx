@@ -2,15 +2,13 @@
 
 #include "util/logger.h"
 
-
 namespace mixxx {
 
 namespace {
 
 const Logger kLogger("AudioSource");
 
-inline
-QUrl validateUrl(QUrl url) {
+inline QUrl validateUrl(QUrl url) {
     DEBUG_ASSERT(url.isValid());
     VERIFY_OR_DEBUG_ASSERT(url.isLocalFile()) {
         kLogger.warning()
@@ -32,4 +30,4 @@ SoundSource::SoundSource(QUrl url, QString type)
           m_type(type) {
 }
 
-} //namespace mixxx
+} // namespace mixxx
