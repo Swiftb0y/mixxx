@@ -228,7 +228,7 @@ NS6II.colors = {
     orange: 56,
     orange_dimm: 36, //could be brown as well
     red_very_dimm: 16,
-}
+};
 // using dict to make ids more robust
 NS6II.hotcue_colors = {
     0: NS6II.colors.orange, // no_color fallback
@@ -307,14 +307,14 @@ NS6II.hotcueColorMapper = new ColorMapper({
     0xE1FF00: 61,
     0xDEEE80: 62,
     0xFFFFFF: 63
-})
+});
 
 NS6II.serato_syx_prefix = [0x00, 0x20, 0x7f];
 NS6II.controller_status_sysex = [0xF0, 0x00, 0x20, 0x7F, 0x03, 0x01, 0xF7];
 
 components.Button.prototype.off = NS6II.use_button_backlight ? 0x01 : 0x00;
 
-NS6II.Pad = function (options) {
+NS6II.Pad = function(options) {
     components.Button.call(this, options);
 };
 NS6II.Pad.prototype = new components.Button({
@@ -338,10 +338,10 @@ components.SamplerButton.prototype.shiftOffset = 8;
 NS6II.Deck = function(channel_offset) {
     var theDeck = this;
     var deckNumber = channel_offset + 1;
-    this.group = '[Channel' + deckNumber + ']';
+    this.group = "[Channel" + deckNumber + "]";
     this.btn_slip = new components.Button({
-        midi: [0x90+channel_offset,0x1F],
-            // shift: [0x90+channel_offset,0x04],
+        midi: [0x90+channel_offset, 0x1F],
+        // shift: [0x90+channel_offset,0x04],
         type: components.Button.prototype.types.toggle,
         unshift: function() {
             this.inKey = "slip_enabled";
@@ -384,10 +384,10 @@ NS6II.Deck = function(channel_offset) {
             } else {
                 // call function do disconnect conn_rate_diff callback.
                 // if (!theDeck.cont_display.dont_disconnect_until_callback_called) {
-                    theDeck.cont_display.handle_rate_feedback_connection(false);
+                theDeck.cont_display.handle_rate_feedback_connection(false);
                 // }
             }
-            this.timer = engine.beginTimer(NS6II.soft_takeover_led_ignore_time,function () {
+            this.timer = engine.beginTimer(NS6II.soft_takeover_led_ignore_time, function() {
                 // reset timer
                 this.timer = 0;
                 // bind connection again.
@@ -395,14 +395,14 @@ NS6II.Deck = function(channel_offset) {
                 theDeck.cont_display.handle_rate_feedback_connection(true);
             }, true);
             switch (channel_offset) {
-                case 0:
-                case 2:
-                    NS6II.slider_pitch_physical_left_val = value;
-                    break;
-                case 1:
-                case 3:
-                    NS6II.slider_pitch_physical_right_val = value;
-                    break;
+            case 0:
+            case 2:
+                NS6II.slider_pitch_physical_left_val = value;
+                break;
+            case 1:
+            case 3:
+                NS6II.slider_pitch_physical_right_val = value;
+                break;
             }
         },
     });
@@ -423,17 +423,17 @@ NS6II.Deck = function(channel_offset) {
         },
     });
     this.btn_pitch_bend_minus = new components.Button({
-            // Doesnt have LED feedback
-            midi: [0x90 + channel_offset, 0x0C],
-            // shift: [0x90+channel_offset,0x2C]
-            unshift: function() {
-                this.inKey = "rate_temp_down";
-                this.input = components.Button.prototype.input;
-            },
-            shift: function() {
-                this.inKey = "rateRange";
-                this.input = function() {
-                    NS6II.current_rate_range_index = ((NS6II.current_rate_range_index + NS6II.current_rate_range_index.length) + 1 ) % NS6II.current_rate_range_index.length;
+        // Doesnt have LED feedback
+        midi: [0x90 + channel_offset, 0x0C],
+        // shift: [0x90+channel_offset,0x2C]
+        unshift: function() {
+            this.inKey = "rate_temp_down";
+            this.input = components.Button.prototype.input;
+        },
+        shift: function() {
+            this.inKey = "rateRange";
+            this.input = function() {
+                NS6II.current_rate_range_index = ((NS6II.current_rate_range_index + NS6II.current_rate_range_index.length) + 1) % NS6II.current_rate_range_index.length;
                 this.setParameter(NS6II.current_rate_range_index);
             };
         },
@@ -479,7 +479,7 @@ NS6II.Deck = function(channel_offset) {
                 this.inSetValue(this.inValueScale(value));
             }
         },
-        inValueScale: function (value) {
+        inValueScale: function(value) {
             // centers values around 0
             return (value < 0x40 ? value : value - 0x80);
         }
@@ -521,7 +521,7 @@ NS6II.Deck = function(channel_offset) {
         // shift: [0x90+channel_offset,0x46]
         timer_mode: false,
         unshift: function() {
-            this.input = function (channelmidi, control, value, status, group) {
+            this.input = function(channelmidi, control, value, status, group) {
                 if (this.isPress(channelmidi, control, value, status)) {
                     theDeck.cap_jog_wheel_touch.scratchEnabled = !theDeck.cap_jog_wheel_touch.scratchEnabled;
                     this.output(theDeck.cap_jog_wheel_touch.scratchEnabled);
@@ -530,11 +530,11 @@ NS6II.Deck = function(channel_offset) {
             this.output(theDeck.cap_jog_wheel_touch.scratchEnabled);
         },
         shift: function() {
-            this.input = function (channelmidi, control, value, status, group) {
+            this.input = function(channelmidi, control, value, status, group) {
                 if (this.isPress(channelmidi, control, value, status)) {
                     // toggle between time_elapsed/_remaining display mode
                     this.timer_mode = !this.timer_mode;
-                    midi.sendShortMsg(0x90 + channel_offset,0x46,this.timer_mode ? 0x7F : 0x00);
+                    midi.sendShortMsg(0x90 + channel_offset, 0x46, this.timer_mode ? 0x7F : 0x00);
                 }
             };
         },
@@ -542,9 +542,9 @@ NS6II.Deck = function(channel_offset) {
 
     this.cont_display = new NS6II.Display(channel_offset, this);
 
-    this.cont_pad_unit = new NS6II.cont_pad_mode_selector(channel_offset+4,this.group);
+    this.cont_pad_unit = new NS6II.cont_pad_mode_selector(channel_offset+4, this.group);
 
-    this.reconnectComponents(function (c) {
+    this.reconnectComponents(function(c) {
         if (c.group === undefined) {
             c.group = theDeck.group;
         }
@@ -554,16 +554,16 @@ NS6II.Deck = function(channel_offset) {
 NS6II.Deck.prototype = new components.Deck();
 
 // JS implementation of engine/enginexfader.cpp:getPowerCalibration  (8005e8cc81f7da91310bfc9088802bf5228a2d43)
-NS6II.getPowerCalibration = function (transform) {
-    return Math.pow(0.5,1.0/transform);
-}
+NS6II.getPowerCalibration = function(transform) {
+    return Math.pow(0.5, 1.0/transform);
+};
 
 // JS implementation of util/rescaler.h:linearToOneByX (a939d976b12b4261f8ba14f7ba5e1f2ce9664342)
-NS6II.linearToOneByX = function (input, inMin, inMax, outMax) {
+NS6II.linearToOneByX = function(input, inMin, inMax, outMax) {
     var outRange = outMax - 1;
     var inRange = inMax - inMin;
     return outMax / (((inMax - input) / inRange * outRange) + 1);
-}
+};
 
 NS6II.Mixer = function() {
     this.Channels = [];
@@ -581,13 +581,13 @@ NS6II.Mixer = function() {
         inKey: "headSplit",
     });
     this.knob_cfContour = new components.Pot({
-        midi: [0xBF,0x09],
+        midi: [0xBF, 0x09],
         input: function(channelmidi, control, value, status, group) {
             // mimic preferences/dialog/dlgprefcrossfader.cpp:slotUpdateXFader
-            var transform = NS6II.linearToOneByX(value,0,0x7F,999.6);
-            engine.setValue("[Mixer Profile]","xFaderCurve",transform)
+            var transform = NS6II.linearToOneByX(value, 0, 0x7F, 999.6);
+            engine.setValue("[Mixer Profile]", "xFaderCurve", transform);
             var calibration = NS6II.getPowerCalibration(transform);
-            engine.setValue("[Mixer Profile]","xFaderCalibration",calibration);
+            engine.setValue("[Mixer Profile]", "xFaderCalibration", calibration);
         },
     });
     print("print created knob_cfContour");
@@ -608,11 +608,11 @@ NS6II.Mixer = function() {
 
 NS6II.Mixer.prototype = new components.ComponentContainer();
 
-NS6II.number_to_syx_payload = function(number,signed) {
+NS6II.number_to_syx_payload = function(number, signed) {
     out = Array(6);
     // build 2's complement in case number is negative
     if (number < 0) {
-        number = ( (~Math.abs(number|0) + 1) >>> 0);
+        number = ((~Math.abs(number|0) + 1) >>> 0);
     }
     // split nibbles of number into array
     for (var i = out.length; i; i--) {
@@ -626,8 +626,8 @@ NS6II.number_to_syx_payload = function(number,signed) {
     return out;
 };
 NS6II.send_syx_message = function(channel, location, payload) {
-    var msg = [0xF0].concat(NS6II.serato_syx_prefix,channel, location, payload,0xF7);
-    midi.sendSysexMsg(msg,msg.length);
+    var msg = [0xF0].concat(NS6II.serato_syx_prefix, channel, location, payload, 0xF7);
+    midi.sendSysexMsg(msg, msg.length);
 };
 // Display might be unique per physical Deck which would mean that it would have to interface with the Deck
 NS6II.Display = function(channel_offset, deck_reference) {
@@ -653,7 +653,7 @@ NS6II.Display = function(channel_offset, deck_reference) {
             value*62.5, // arbitrary controller specific scaling factor
             true // signed int
         );
-        payload.splice(1,0,0x0);
+        payload.splice(1, 0, 0x0);
         NS6II.send_syx_message(
             channel,
             0x3,
@@ -676,7 +676,7 @@ NS6II.Display = function(channel_offset, deck_reference) {
             true // signed int
         );
         // controller requires one more nibble of precision for this control
-        payload.splice(1,0,0x0);
+        payload.splice(1, 0, 0x0);
         NS6II.send_syx_message(
             channel,
             0x04,
@@ -694,24 +694,24 @@ NS6II.Display = function(channel_offset, deck_reference) {
         // check if value is positive so we can use a simplified formula.
         var platter_strip_pos_rel = (platter_strip_pos >= 0 ?
             platter_strip_pos%1 :
-            (platter_strip_pos%1 + 1)%1)*0x7F
+            (platter_strip_pos%1 + 1)%1)*0x7F;
         // update elapsed time on Display
         midi.sendShortMsg(0xB0 + channel_offset, 0x06, platter_strip_pos_rel);
     };
     this.conn_playpos = engine.makeConnection(deck, "playposition", this.mngr_playpos);
     this.conn_playpos.trigger();
 
-    this.deck_loaded = engine.makeConnection(deck, "track_loaded", function (value) {
+    this.deck_loaded = engine.makeConnection(deck, "track_loaded", function(value) {
         theDisplay.data_track_info.loaded = value;
     });
     this.deck_loaded.trigger();
     // manages everything related to the bpm feedback
     this.conn_bpm = engine.makeConnection(deck, "bpm", function(value) {
-            // send absolute bpm
-            NS6II.send_syx_message(channel,
-                0x01,
-                NS6II.number_to_syx_payload(value * 100)
-            );
+        // send absolute bpm
+        NS6II.send_syx_message(channel,
+            0x01,
+            NS6II.number_to_syx_payload(value * 100)
+        );
     });
     // manages everything related to the rate/pitch feedback
     this.conn_rate = engine.makeConnection(deck, "rate", function(value) {
@@ -728,13 +728,13 @@ NS6II.Display = function(channel_offset, deck_reference) {
     });
     this.soft_takeover_enabled = false;
     // gets called whenever the user switches the deck on the controller
-    this.mngr_deck_watcher = function () {
-        engine.softTakeoverIgnoreNextValue(deck,"rate");
+    this.mngr_deck_watcher = function() {
+        engine.softTakeoverIgnoreNextValue(deck, "rate");
         this.soft_takeover_enabled = true;
         this.handle_rate_feedback_connection(true);
         // this.conn_rate_diff.trigger();
-    }
-    this.handle_rate_feedback_connection = function (bind) {
+    };
+    this.handle_rate_feedback_connection = function(bind) {
         print("connected: "+this.conn_rate_diff.isConnected);
         print("soft_takeover_enabled: "+this.soft_takeover_enabled);
         if (bind) {
@@ -749,16 +749,16 @@ NS6II.Display = function(channel_offset, deck_reference) {
                     // scale value from [-1;1] value to [0,1] parameter format
                     value = (value + 1)/2;
                     switch (channel_offset) {
-                        case 0:
-                        case 2:
-                            midi.sendShortMsg(0x90 + channel_offset, 0x09, NS6II.slider_pitch_physical_left_val > value ? 0x7F : 0x00);
-                            midi.sendShortMsg(0x90 + channel_offset, 0x0A, NS6II.slider_pitch_physical_left_val < value ? 0x7F : 0x00);
-                            break;
-                        case 1:
-                        case 3:
-                            midi.sendShortMsg(0x90 + channel_offset, 0x09, NS6II.slider_pitch_physical_right_val > value ? 0x7F : 0x00);
-                            midi.sendShortMsg(0x90 + channel_offset, 0x0A, NS6II.slider_pitch_physical_right_val < value ? 0x7F : 0x00);
-                            break;
+                    case 0:
+                    case 2:
+                        midi.sendShortMsg(0x90 + channel_offset, 0x09, NS6II.slider_pitch_physical_left_val > value ? 0x7F : 0x00);
+                        midi.sendShortMsg(0x90 + channel_offset, 0x0A, NS6II.slider_pitch_physical_left_val < value ? 0x7F : 0x00);
+                        break;
+                    case 1:
+                    case 3:
+                        midi.sendShortMsg(0x90 + channel_offset, 0x09, NS6II.slider_pitch_physical_right_val > value ? 0x7F : 0x00);
+                        midi.sendShortMsg(0x90 + channel_offset, 0x0A, NS6II.slider_pitch_physical_right_val < value ? 0x7F : 0x00);
+                        break;
                     }
                 });
             }
@@ -768,7 +768,7 @@ NS6II.Display = function(channel_offset, deck_reference) {
                 this.conn_rate_diff.disconnect();
             }
         }
-    }
+    };
     // create placeholder object so QtScript doesnt fail when accessing
     // property of an undefined project
     this.conn_rate_diff = {};
@@ -867,10 +867,10 @@ NS6II.cont_pm_loop_auto = function(channel_offset) {
         theContainer.current_root_loop_size = Math.min(Math.max(-5, loop_size), 7);
         var i = 0;
         var loop_size = 0;
-        _.forEach(theContainer.pads,function (c) {
+        _.forEach(theContainer.pads, function(c) {
             if (c instanceof components.Component) {
                 c.disconnect();
-                loop_size = Math.pow(2,theContainer.current_root_loop_size + (i++));
+                loop_size = Math.pow(2, theContainer.current_root_loop_size + (i++));
                 c.inKey = "beatloop_" + loop_size + "_toggle";
                 c.outKey = "beatloop_" + loop_size + "_enabled";
                 c.connect();
@@ -916,10 +916,10 @@ NS6II.cont_pm_loop_roll = function(channel_offset) {
         // clamp loop_size to [-5;7]
         theContainer.current_root_loop_size = Math.min(Math.max(-5, loop_size), 7);
         var i = 0;
-        _.forEach(theContainer.pads,function (c) {
+        _.forEach(theContainer.pads, function(c) {
             if (c instanceof components.Component) {
-                c.disconnect()
-                c.inKey = "beatlooproll_" + Math.pow(2,theContainer.current_root_loop_size + (i++)) + "_activate";
+                c.disconnect();
+                c.inKey = "beatlooproll_" + Math.pow(2, theContainer.current_root_loop_size + (i++)) + "_activate";
                 c.outKey = c.inKey;
                 c.connect();
                 c.trigger();
@@ -992,7 +992,7 @@ NS6II.cont_pm_loop_ctrl = function(channel_offset) {
             // do nothing
         },
     });
-}
+};
 NS6II.cont_pm_loop_ctrl.prototype = new components.ComponentContainer();
 
 NS6II.cont_pm_sampler_normal = function(channel_offset) {
@@ -1113,7 +1113,7 @@ NS6II.pad_mode_mapper = {
     0x0F: 0x0B,
     0x09: NS6II.cont_pm_settings,
 };
-NS6II.cont_pad_mode_selector = function(channel_offset,group) {
+NS6II.cont_pad_mode_selector = function(channel_offset, group) {
     var theSelector = this;
     var current_pad_index = 0;
     var next_pad_index = 0;
@@ -1136,7 +1136,7 @@ NS6II.cont_pad_mode_selector = function(channel_offset,group) {
                     // resolve shift control reroute
                     resolved_control = preliminary_pad;
                     preliminary_pad = NS6II.pad_mode_mapper[resolved_control];
-                } else if (preliminary_pad instanceof Array){
+                } else if (preliminary_pad instanceof Array) {
                     var preliminary_pad_len = preliminary_pad.length;
                     // reset pad index if button changed.
                     if (resolved_control !== last_control) {
@@ -1154,7 +1154,7 @@ NS6II.cont_pad_mode_selector = function(channel_offset,group) {
             midi.sendShortMsg(0x90 + channel_offset, resolved_control, page_layer_to_led[current_pad_index]);
             current_pad_index = next_pad_index;
             if (last_control !== null && last_control !== resolved_control) {
-                midi.sendShortMsg(0x90 + channel_offset, last_control, components.Button.prototype.off)
+                midi.sendShortMsg(0x90 + channel_offset, last_control, components.Button.prototype.off);
             }
             last_control = resolved_control;
         }
@@ -1164,7 +1164,7 @@ NS6II.cont_pad_mode_selector = function(channel_offset,group) {
             component.disconnect();
         });
         theSelector.pad_unit = new pad_container(channel_offset);
-        theSelector.pad_unit.reconnectComponents(function (c) {
+        theSelector.pad_unit.reconnectComponents(function(c) {
             if (c.group === undefined) {
                 c.group = group;
             }
@@ -1181,7 +1181,7 @@ NS6II.Channel = function(channel_offset) {
     var deck = "[Channel" + (channel_offset+1) + "]";
     var theChannel = this;
     this.btn_load_track_into_deck = new components.Button({
-         midi: [0x9F, 0x02 + channel_offset],
+        midi: [0x9F, 0x02 + channel_offset],
         // midi: [0x90 + channel_offset, 0x17],
         group: deck,
         shift: function() {
@@ -1227,7 +1227,7 @@ NS6II.Channel = function(channel_offset) {
         } else {
             this.last_vu_level = value;
         }
-        midi.sendShortMsg(0xB0 + channel_offset, 0x1F,value * 20);
+        midi.sendShortMsg(0xB0 + channel_offset, 0x1F, value * 20);
     });
     this.knob_pre_gain = new components.Pot({
         midi: [0xB0 + channel_offset, 0x16],
@@ -1238,17 +1238,17 @@ NS6II.Channel = function(channel_offset) {
     for (var i = 1; i <= 3; i++) {
         this.eqKnobs[i] = new components.Pot({
             midi: [0xB0 + channel_offset, 0x16 + i],
-            group: '[EqualizerRack1_' + deck + '_Effect1]',
-            inKey: 'parameter' + (4-i),
+            group: "[EqualizerRack1_" + deck + "_Effect1]",
+            inKey: "parameter" + (4-i),
         });
     }
     this.eqCaps = [];
     for (var i = 1; i <= 3; i++) {
         this.eqCaps[i] = new components.Button({
             midi: [0x90 + channel_offset, 0x16 + i],
-            group: '[EqualizerRack1_' + deck + '_Effect1]',
-            inKey: 'button_parameter' + (4-i),
-            isPress: function (channel, control, value, status) {
+            group: "[EqualizerRack1_" + deck + "_Effect1]",
+            inKey: "button_parameter" + (4-i),
+            isPress: function(channel, control, value, status) {
                 return NS6II.btn_knob_cap_behavior.state > 1 && value > 0;
             }
         });
@@ -1263,21 +1263,21 @@ NS6II.Channel = function(channel_offset) {
         group: "[QuickEffectRack1_" + deck + "_Effect1]",
         inKey: "enabled",
         input: function(channelmidi, control, value, status, group) {
-            this.inSetter(value, channelmidi, control, status)
+            this.inSetter(value, channelmidi, control, status);
         },
         // extra function because it gets called from NS6II.btn_filter_knob_behavior as well
-        inSetter: function (value, channelmidi, control, status) {
+        inSetter: function(value, channelmidi, control, status) {
             if (NS6II.btn_knob_cap_behavior.state > 1) {
                 switch (NS6II.btn_filter_knob_behavior.state) {
-                    case 0:
+                case 0:
                     if (!this.inGetParameter()) {
                         this.inSetValue(true);
                     }
                     break;
-                    case 1:
+                case 1:
                     this.inSetParameter(this.isPress(channelmidi, control, value, status));
                     break;
-                    case 2:
+                case 2:
                     if (this.inGetParameter()) {
                         this.inSetValue(false);
                     }
@@ -1306,15 +1306,15 @@ NS6II.Channel = function(channel_offset) {
             // Controller values to represent the orientation and mixxx
             // orientation representation don't match.
             switch (value) {
-                case 0:
-                    this.inSetValue(1);
-                    break;
-                case 1:
-                    this.inSetValue(0);
-                    break;
-                case 2:
-                    this.inSetValue(2);
-                    break;
+            case 0:
+                this.inSetValue(1);
+                break;
+            case 1:
+                this.inSetValue(0);
+                break;
+            case 2:
+                this.inSetValue(2);
+                break;
             }
         },
     });
@@ -1372,21 +1372,21 @@ NS6II.navBar.prototype = new components.ComponentContainer();
 
 
 NS6II.btn_knob_cap_behavior = new components.Button({
-    midi: [0x9F,0x59],
+    midi: [0x9F, 0x59],
     state: 0,
-    input: function (channel, control, value, status, group) {
+    input: function(channel, control, value, status, group) {
         this.state = value/63 | 0;
         if (NS6II.hide_killswitches_when_unused) {
             // only show UI killswitches if they are activated
-            engine.setParameter("[Skin]","show_eq_kill_buttons",this.state>1);
+            engine.setParameter("[Skin]", "show_eq_kill_buttons", this.state>1);
         }
     },
 });
 
 NS6II.btn_filter_knob_behavior = new components.Button({
-    midi: [0x9F,0x5A],
+    midi: [0x9F, 0x5A],
     state: 0,
-    input: function (channel, control, value, status, group) {
+    input: function(channel, control, value, status, group) {
         this.state = value/63 | 0;
     },
 });
@@ -1398,19 +1398,19 @@ for (var i = 1; i <= 2; i++) {
         NS6II.EffectUnits[i].enableButtons[ii + 1].midi = [0x97 + i, ii]; // shift: [0x97+i,0x0B+ii]
         NS6II.EffectUnits[i].cap_temp_enable[ii + 1] = new components.Button({
             midi: [0x97 + i, 0x21 + ii],
-            group: '[EffectRack1_EffectUnit' + NS6II.EffectUnits[i].currentUnitNumber +
-                '_Effect' + (ii+1) + ']',
+            group: "[EffectRack1_EffectUnit" + NS6II.EffectUnits[i].currentUnitNumber +
+                "_Effect" + (ii+1) + "]",
             inKey: "enabled",
             shifted: false, // custom static property; used to disable fx input while selecting
-            input: function (midichannel, control, value, status, group) {
+            input: function(midichannel, control, value, status, group) {
                 if (NS6II.btn_knob_cap_behavior.state > 0) {
                     this.inSetParameter(this.isPress(midichannel, control, value, status) && !this.shifted);
                 }
             },
-            unshift: function () {
+            unshift: function() {
                 this.shifted = false;
             },
-            shift: function () {
+            shift: function() {
                 this.shifted = true;
             },
         });
@@ -1430,9 +1430,9 @@ for (var i = 1; i <= 2; i++) {
         type: components.Button.prototype.types.toggle,
         inKey: "mix_mode",
         group: NS6II.EffectUnits[i].group,
-    })
+    });
     for (var ii = 0; ii < 4; ii++) {
-        var channel = "Channel"+(ii + 1)
+        var channel = "Channel"+(ii + 1);
         NS6II.EffectUnits[i].enableOnChannelButtons.addButton(channel);
         NS6II.EffectUnits[i].enableOnChannelButtons[channel].midi = [0x97 + i, 0x05 + ii];
     }
@@ -1447,7 +1447,7 @@ NS6II.init = function() {
     NS6II.pot_caps_active = true; // handle by touch fx button later
 
     // force headMix to 0 because it is managed by the controller hardware mixer.
-    engine.setParameter("[Master]","headMix",0);
+    engine.setParameter("[Master]", "headMix", 0);
 
     var default_rate_range = engine.getValue("[Channel1]", "rateRange");
     NS6II.current_rate_range_index = NS6II.rate_ranges.indexOf(default_rate_range);
@@ -1467,7 +1467,7 @@ NS6II.init = function() {
     print("created decks");
     NS6II.Mixer_instance = new NS6II.Mixer();
     print("constructed mixer");
-    midi.sendSysexMsg(NS6II.controller_status_sysex,NS6II.controller_status_sysex.length);
+    midi.sendSysexMsg(NS6II.controller_status_sysex, NS6II.controller_status_sysex.length);
     print("sent controller status request");
 };
 
@@ -1476,7 +1476,7 @@ NS6II.init = function() {
 // ES3 Polyfills
 var Number = {};
 Number.isInteger = function(value) {
-  return typeof value === 'number' &&
+    return typeof value === "number" &&
     isFinite(value) &&
     Math.floor(value) === value;
 };
