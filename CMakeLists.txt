@@ -414,6 +414,7 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/effects/builtin/linkwitzriley8eqeffect.cpp
   src/effects/builtin/loudnesscontoureffect.cpp
   src/effects/builtin/metronomeeffect.cpp
+  src/effects/builtin/whitenoiseeffect.cpp
   src/effects/builtin/moogladder4filtereffect.cpp
   src/effects/builtin/parametriceqeffect.cpp
   src/effects/builtin/phasereffect.cpp
@@ -604,8 +605,12 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/library/starrating.cpp
   src/library/tableitemdelegate.cpp
   src/library/trackcollection.cpp
+  src/library/trackcollectioniterator.cpp
   src/library/trackcollectionmanager.cpp
   src/library/trackloader.cpp
+  src/library/trackmodeliterator.cpp
+  src/library/trackprocessing.cpp
+  src/library/traktor/traktorfeature.cpp
   src/library/treeitem.cpp
   src/library/treeitemmodel.cpp
   src/mixer/auxiliary.cpp
@@ -784,6 +789,7 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/util/statsmanager.cpp
   src/util/tapfilter.cpp
   src/util/task.cpp
+  src/util/taskmonitor.cpp
   src/util/threadcputimer.cpp
   src/util/time.cpp
   src/util/timer.cpp
