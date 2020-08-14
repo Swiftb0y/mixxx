@@ -961,12 +961,16 @@ endif()
 
 option(DEBUG_ASSERTIONS_FATAL "Fail if debug become true assertions" OFF)
 if(DEBUG_ASSERTIONS_FATAL)
-  target_compile_definitions(mixxx-lib PUBLIC MIXXX_DEBUG_ASSERTIONS_FATAL)
+  target_compile_definitions(mixxx-lib PUBLIC MIXXX_DEBUG_ASSERTIONS_FATAL MIXXX_DEBUG_ASSERTIONS_ENABLED)
+  if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "DEBUG_ASSERT statements have been enabled because DEBUG_ASSERTIONS_FATAL is ON.")
+  endif()
 endif()
 
 target_compile_definitions(mixxx-lib PUBLIC
   "${CMAKE_SYSTEM_PROCESSOR}"
   $<$<CONFIG:Debug>:MIXXX_BUILD_DEBUG>
+  $<$<CONFIG:Debug>:MIXXX_DEBUG_ASSERTIONS_ENABLED>
   $<$<NOT:$<CONFIG:Debug>>:MIXXX_BUILD_RELEASE>
   # Disable assert.h assertions in release mode. Some libraries use
   # this as a signal for when to enable code that should be disabled
@@ -1336,6 +1340,7 @@ include(GoogleTest)
 enable_testing()
 gtest_add_tests(
   TARGET mixxx-test
+  EXTRA_ARGS --logLevel info
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   TEST_LIST testsuite
 )
@@ -1452,6 +1457,52 @@ if(WIN32)
    # Chromaprint is always built statically and needs fftw.
   find_package(FFTW REQUIRED)
   target_link_libraries(mixxx-lib PUBLIC FFTW::FFTW)
+endif()
+
+# Denon Engine Prime library export support (using libdjinterop)
+option(ENGINEPRIME "Support for library export to Denon Engine Prime" OFF)
+if(ENGINEPRIME)
+  target_compile_definitions(mixxx-lib PUBLIC __ENGINEPRIME__)
+
+  # Look for an existing installation of libdjinterop and use that if available.
+  # Otherwise, download and build from GitHub.
+  find_package(DjInterop)
+  if(DjInterop_FOUND)
+    # An existing installation of djinterop is available.
+    message(STATUS "Linking dynamically to existing installation of libdjinterop")
+    target_include_directories(mixxx-lib PUBLIC ${DjInterop_INCLUDE_DIRS})
+    target_link_libraries(mixxx-lib PUBLIC DjInterop::DjInterop)
+  else()
+    # Fetch djinterop sources from GitHub and build them statically.
+    message(STATUS "Linking statically to libdjinterop fetched from GitHub")
+
+    set(DJINTEROP_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib/libdjinterop-install")
+    ExternalProject_Add(libdjinterop
+      GIT_REPOSITORY https://github.com/xsco/libdjinterop.git
+      GIT_TAG tags/0.11.0
+      GIT_SHALLOW TRUE
+      INSTALL_DIR ${DJINTEROP_INSTALL_DIR}
+      CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+      EXCLUDE_FROM_ALL TRUE
+    )
+
+    # Assemble a library based on the external project.
+    add_library(mixxx-libdjinterop STATIC IMPORTED)
+    add_dependencies(mixxx-libdjinterop libdjinterop)
+    set(DJINTEROP_INCLUDE_DIR "${DJINTEROP_INSTALL_DIR}/include")
+    set(DJINTEROP_LIBRARY "${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}djinterop${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    set(DJINTEROP_LIBRARY_DIR "${DJINTEROP_INSTALL_DIR}/${DJINTEROP_LIBRARY}")
+    set_target_properties(mixxx-libdjinterop PROPERTIES IMPORTED_LOCATION "${DJINTEROP_LIBRARY_DIR}")
+    target_include_directories(mixxx-lib PUBLIC ${DJINTEROP_INCLUDE_DIR})
+    target_link_libraries(mixxx-lib PUBLIC mixxx-libdjinterop)
+
+    # Since we have built libdjinterop from sources as a static library, its
+    # transitive dependencies are not automatically recognised.  libdjinterop
+    # depends on zlib and sqlite3.  Mixxx already has a dependency on sqlite3,
+    # but not zlib, so we explicitly add that here.
+    find_package(ZLIB 1.2.8 REQUIRED)
+    target_link_libraries(mixxx-lib PUBLIC ${ZLIB_LIBRARIES})
+  endif()
 endif()
 
 # Ebur128
@@ -2118,7 +2169,14 @@ endif()
 
 # Locale Aware Compare for SQLite
 find_package(SQLite3)
-cmake_dependent_option(LOCALECOMPARE "Locale Aware Compare support for SQLite" ON "SQLite3_FOUND" OFF)
+# FIXME
+# It is difficult to get qmake to link Qt to a custom built SQLite on macOS instead of the system SQLite,
+# which results in a crash on startup when LOCALECOMPARE is enabled.
+if(APPLE)
+  cmake_dependent_option(LOCALECOMPARE "Locale Aware Compare support for SQLite" OFF "SQLite3_FOUND" OFF)
+else()
+  cmake_dependent_option(LOCALECOMPARE "Locale Aware Compare support for SQLite" ON "SQLite3_FOUND" OFF)
+endif()
 if(LOCALECOMPARE)
   if(NOT SQLite3_FOUND)
     message(FATAL_ERROR "Locale Aware Compare for SQLite requires libsqlite and its development headers.")
