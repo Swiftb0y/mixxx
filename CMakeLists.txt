@@ -727,6 +727,8 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/track/keyutils.cpp
   src/track/playcounter.cpp
   src/track/replaygain.cpp
+  src/track/serato/beatgrid.cpp
+  src/track/serato/beatsimporter.cpp
   src/track/serato/cueinfoimporter.cpp
   src/track/serato/markers.cpp
   src/track/serato/markers2.cpp
@@ -909,6 +911,7 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/widget/wtracktableview.cpp
   src/widget/wtracktableviewheader.cpp
   src/widget/wtracktext.cpp
+  src/widget/wtrackwidgetgroup.cpp
   src/widget/wvumeter.cpp
   src/widget/wwaveformviewer.cpp
   src/widget/wwidget.cpp
@@ -1293,6 +1296,7 @@ add_executable(mixxx-test
   src/test/sampleutiltest.cpp
   src/test/schemamanager_test.cpp
   src/test/searchqueryparsertest.cpp
+  src/test/seratobeatgridtest.cpp
   src/test/seratomarkerstest.cpp
   src/test/seratomarkers2test.cpp
   src/test/seratotagstest.cpp
@@ -1344,7 +1348,6 @@ gtest_add_tests(
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   TEST_LIST testsuite
 )
-set_tests_properties(${testsuite} PROPERTIES TIMEOUT 30)
 
 # Benchmarking
 add_custom_target(mixxx-benchmark
