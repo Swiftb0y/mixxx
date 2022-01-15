@@ -1052,7 +1052,9 @@ void SoundDevicePortAudio::updateCallbackEntryToDacTime(
         callbackEntrytoDacSecs = math_clamp(callbackEntrytoDacSecs, 0.0, bufferSizeSec * 2);
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     VisualPlayPosition::setCallbackEntryToDacSecs(callbackEntrytoDacSecs, m_clkRefTimer);
+#endif
     m_lastCallbackEntrytoDacSecs = callbackEntrytoDacSecs;
 
     //qDebug() << callbackEntrytoDacSecs << timeSinceLastCbSecs;

@@ -165,8 +165,10 @@ EngineBuffer::EngineBuffer(const QString& group,
             this, &EngineBuffer::slotControlSeek,
             Qt::DirectConnection);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     // Control used to communicate ratio playpos to GUI thread
     m_visualPlayPos = VisualPlayPosition::getVisualPlayPosition(m_group);
+#endif
 
     m_pRepeat = new ControlPushButton(ConfigKey(m_group, "repeat"));
     m_pRepeat->setButtonMode(ControlPushButton::TOGGLE);
@@ -551,7 +553,9 @@ void EngineBuffer::slotTrackLoaded(TrackPointer pTrack,
     TrackPointer pOldTrack = m_pCurrentTrack;
     m_pause.lock();
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     m_visualPlayPos->setInvalid();
+#endif
     m_playPosition = kInitialPlayPosition; // for execute seeks to 0.0
     m_pCurrentTrack = pTrack;
     m_pTrackSamples->set(iTrackNumSamples);
@@ -593,7 +597,9 @@ void EngineBuffer::ejectTrack() {
     TrackPointer pOldTrack = m_pCurrentTrack;
     m_pause.lock();
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     m_visualPlayPos->set(0.0, 0.0, 0.0, 0.0, 0.0);
+#endif
     doSeekPlayPos(mixxx::audio::kStartFramePos, SEEK_EXACT);
 
     m_pCurrentTrack.reset();
@@ -1348,8 +1354,6 @@ void EngineBuffer::updateIndicators(double speed, int iBufferSize) {
 
     const double fFractionalPlaypos = fractionalPlayposFromAbsolute(m_playPosition);
 
-    const double tempoTrackSeconds = m_trackEndPositionOld.value() /
-            m_trackSampleRateOld / m_tempo_ratio_old;
     if(speed > 0 && fFractionalPlaypos == 1.0) {
         // At Track end
         speed = 0;
@@ -1370,6 +1374,10 @@ void EngineBuffer::updateIndicators(double speed, int iBufferSize) {
         m_pCueControl->updateIndicators();
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    const double tempoTrackSeconds = m_trackEndPositionOld.value() /
+            m_trackSampleRateOld / m_tempo_ratio_old;
+
     // Update visual control object, this needs to be done more often than the
     // playpos slider
     m_visualPlayPos->set(fFractionalPlaypos,
@@ -1378,6 +1386,7 @@ void EngineBuffer::updateIndicators(double speed, int iBufferSize) {
                     m_trackEndPositionOld.toEngineSamplePos(),
             fractionalPlayposFromAbsolute(m_slipPosition),
             tempoTrackSeconds);
+#endif
 
     // TODO: Especially with long audio buffers, jitter is visible. This can be fixed by moving the
     // ClockControl::updateIndicators into the waveform update loop which is synced with the display refresh rate.
@@ -1452,14 +1461,27 @@ void EngineBuffer::slotEjectTrack(double v) {
 }
 
 mixxx::audio::FramePos EngineBuffer::getExactPlayPos() const {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    const mixxx::audio::FramePos trackEndPosition = getTrackEndPosition();
+    if (!trackEndPosition.isValid()) {
+        return mixxx::audio::kStartFramePos;
+    }
+
+    return trackEndPosition * getVisualPlayPos();
+#else
     if (!m_visualPlayPos->isValid()) {
         return mixxx::audio::kStartFramePos;
     }
     return getTrackEndPosition() * m_visualPlayPos->getEnginePlayPos();
+#endif
 }
 
 double EngineBuffer::getVisualPlayPos() const {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return m_playposSlider->get();
+#else
     return m_visualPlayPos->getEnginePlayPos();
+#endif
 }
 
 mixxx::audio::FramePos EngineBuffer::getTrackEndPosition() const {

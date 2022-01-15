@@ -479,12 +479,14 @@ void SoundDeviceNetwork::callbackProcessClkRef() {
 
 void SoundDeviceNetwork::updateCallbackEntryToDacTime() {
     m_clkRefTimer.start();
-    qint64 currentTime = m_pNetworkStream->getInputStreamTimeUs();
     m_targetTime += m_audioBufferTime.toIntegerMicros();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    qint64 currentTime = m_pNetworkStream->getInputStreamTimeUs();
     double callbackEntrytoDacSecs = (m_targetTime - currentTime) / 1000000.0;
     callbackEntrytoDacSecs = math_max(callbackEntrytoDacSecs, 0.0001);
     VisualPlayPosition::setCallbackEntryToDacSecs(callbackEntrytoDacSecs, m_clkRefTimer);
     //qDebug() << callbackEntrytoDacSecs << timeSinceLastCbSecs;
+#endif
 }
 
 void SoundDeviceNetwork::updateAudioLatencyUsage() {
