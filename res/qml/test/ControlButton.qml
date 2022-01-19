@@ -1,10 +1,8 @@
-// import Mixxx 0.1 as Mixxx
-
-import "." as Skin
+import "." as Local
 import QtQml 2.12
 import QtQuick 2.12
 
-Skin.Button {
+Local.Button {
     id: root
 
     highlight: true
