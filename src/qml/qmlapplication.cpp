@@ -190,8 +190,10 @@ void QmlApplication::loadQml(const QString& path) {
     // so it is necessary to destroy the old QQmlApplicationEngine and create a new one.
     m_pAppEngine = std::make_unique<QQmlApplicationEngine>();
 
-    const QFileInfo fileInfo(path);
-    m_pAppEngine->addImportPath(fileInfo.absoluteDir().absolutePath());
+    // NOTE: this breaks on Qt6 in all sorts of strange ways:
+    // https://mixxx.zulipchat.com/#narrow/stream/109171-development/topic/QML/near/268322417
+    // const QFileInfo fileInfo(path);
+    // m_pAppEngine->addImportPath(fileInfo.absoluteDir().absolutePath());
 
     // No memory leak here, the QQmlEngine takes ownership of the provider
     QQuickAsyncImageProvider* pImageProvider = new AsyncImageProvider();
