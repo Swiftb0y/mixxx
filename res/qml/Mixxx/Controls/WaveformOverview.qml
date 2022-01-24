@@ -1,5 +1,5 @@
 import Mixxx 0.1 as Mixxx
-import Mixxx.Controls 0.1 as MixxxControls
+// import "./Mixxx/Controls" 0.1 as MixxxControls
 import QtQuick 2.12
 import QtQuick.Shapes 1.12
 
@@ -34,7 +34,7 @@ Mixxx.WaveformOverview {
         Repeater {
             model: 8
 
-            MixxxControls.WaveformOverviewHotcueMarker {
+            WaveformOverviewHotcueMarker {
                 anchors.fill: parent
                 group: root.group
                 hotcueNumber: index + 1
@@ -42,7 +42,7 @@ Mixxx.WaveformOverview {
 
         }
 
-        MixxxControls.WaveformOverviewMarker {
+        WaveformOverviewMarker {
             id: playPositionMarker
 
             anchors.fill: parent

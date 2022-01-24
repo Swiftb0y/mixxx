@@ -1,12 +1,18 @@
 import "." as Skin
+// import Mixxx.Controls 0.1 as MixxxControls
+import "./Mixxx/Controls" 0.1 as MixxxControls
 import Mixxx 0.1 as Mixxx
-import Mixxx.Controls 0.1 as MixxxControls
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.11
 import "Theme"
 
 Rectangle {
+    // Mixxx.PlayerDropArea {
+    //     anchors.fill: parent
+    //     group: root.group
+    // }
+
     id: root
 
     property string group // required
@@ -186,11 +192,6 @@ Rectangle {
             else
                 ejectControl.trigger();
         }
-    }
-
-    Mixxx.PlayerDropArea {
-        anchors.fill: parent
-        group: root.group
     }
 
 }

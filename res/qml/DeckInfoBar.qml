@@ -1,7 +1,8 @@
 import "." as Skin
 import Mixxx 0.1 as Mixxx
-import Mixxx.Controls 0.1 as MixxxControls
-import QtGraphicalEffects 1.12
+// import Mixxx.Controls 0.1 as MixxxControls
+// import QtGraphicalEffects 1.12
+import Qt5Compat.GraphicalEffects
 import QtQuick 2.12
 import "Theme"
 
@@ -55,6 +56,23 @@ Rectangle {
     }
 
     Item {
+        //     MixxxControls.Spinny {
+        //         id: spinnyIndicator
+        //         anchors.fill: parent
+        //         group: root.group
+        //         indicatorVisible: false
+        //         indicator: Item {
+        //             width: spinnyIndicator.width
+        //             height: spinnyIndicator.height
+        //             Rectangle {
+        //                 anchors.horizontalCenter: parent.horizontalCenter
+        //                 width: 2
+        //                 height: parent.height / 2
+        //                 color: Theme.deckTextColor
+        //             }
+        //         }
+        //     }
+
         id: spinny
 
         anchors.fill: coverArt
@@ -66,28 +84,6 @@ Rectangle {
             group: root.group
             key: "play"
             onValueChanged: spinnyIndicator.indicatorVisible = (value > 0)
-        }
-
-        MixxxControls.Spinny {
-            id: spinnyIndicator
-
-            anchors.fill: parent
-            group: root.group
-            indicatorVisible: false
-
-            indicator: Item {
-                width: spinnyIndicator.width
-                height: spinnyIndicator.height
-
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: 2
-                    height: parent.height / 2
-                    color: Theme.deckTextColor
-                }
-
-            }
-
         }
 
     }
