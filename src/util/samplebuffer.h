@@ -135,47 +135,39 @@ class SampleBuffer final {
 
     class WritableSlice {
       public:
-        WritableSlice()
-            : m_data(nullptr),
-              m_length(0) {
-        }
+        WritableSlice() = default;
+
         WritableSlice(CSAMPLE* data, SINT length)
-            : m_data(data),
-              m_length(length) {
-            DEBUG_ASSERT(m_length >= 0);
-            DEBUG_ASSERT((m_length == 0) || (m_data != nullptr));
+                : m_span{data, static_cast<std::size_t>(length)} {
+            DEBUG_ASSERT(length >= 0);
         }
         explicit WritableSlice(SampleBuffer& buffer)
-            : m_data(buffer.data()),
-              m_length(buffer.size()) {
-        }
-        WritableSlice(SampleBuffer& buffer, SINT offset, SINT length)
-            : m_data(buffer.data(offset)),
-              m_length(length) {
+                : m_data(std::move(buffer.span()))
+
+                          WritableSlice(SampleBuffer & buffer,
+                                  SINT offset,
+                                  SINT length)
+                : m_span{std::move(buffer.span().subspan(
+                          static_cast<std::size_t>(offset),
+                          static_cast<std::size_t>(offset)))} {
             DEBUG_ASSERT((buffer.size() - offset) >= length);
         }
         CSAMPLE* data(SINT offset = 0) const {
-            DEBUG_ASSERT((m_data != nullptr) || (offset == 0));
-            DEBUG_ASSERT(0 <= offset);
-            // >=: allow access to one element behind allocated memory
-            DEBUG_ASSERT(m_length >= offset);
-            return m_data + offset;
+            DEBUG_ASSERT(m_span.size() >= offset);
+            return m_span.subspan(offset).data();
         }
         SINT length(SINT offset = 0) const {
-            DEBUG_ASSERT(0 <= offset);
-            // >=: allow access to one element behind allocated memory
-            DEBUG_ASSERT(m_length >= offset);
-            return m_length - offset;
+            return m_span.size() - offset;
         }
         bool empty() const {
-            return (m_data == nullptr) || (m_length <= 0);
+            return m_span.empty();
         }
-        CSAMPLE& operator[](SINT index) const {
-            return *data(index);
+        const CSAMPLE& operator[](SINT index) const {
+            return m_span[static_cast<std::size_t>(index)];
         }
+
       private:
-        CSAMPLE* m_data;
-        SINT m_length;
+        std::span<CSAMPLE> m_span;
     };
 
   private:
