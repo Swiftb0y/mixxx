@@ -2,6 +2,7 @@
 
 
 #include <algorithm> // std::swap
+#include <span>
 
 #include "util/types.h"
 
@@ -70,6 +71,13 @@ class SampleBuffer final {
         // >=: allow access to one element behind allocated memory
         DEBUG_ASSERT(m_size >= offset);
         return m_data + offset;
+    }
+
+    std::span<CSAMPLE> span() {
+        return std::span{m_data, static_cast<std::size_t>(m_size)};
+    }
+    const std::span<CSAMPLE> span() const {
+        return std::span{m_data, static_cast<std::size_t>(m_size)};
     }
 
     CSAMPLE& operator[](SINT index) {
