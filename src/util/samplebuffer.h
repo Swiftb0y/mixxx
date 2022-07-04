@@ -104,43 +104,33 @@ class SampleBuffer final {
 
     class ReadableSlice {
       public:
-        ReadableSlice()
-            : m_data(nullptr),
-              m_length(0) {
-        }
+        ReadableSlice() = default;
+
         ReadableSlice(const CSAMPLE* data, SINT length)
-            : m_data(data),
-              m_length(length) {
-            DEBUG_ASSERT(m_length >= 0);
-            DEBUG_ASSERT((m_length == 0) || (m_data != nullptr));
+                : m_span{data, static_cast<std::size_t>(length)} {
+            DEBUG_ASSERT(length >= 0);
         }
         ReadableSlice(const SampleBuffer& buffer, SINT offset, SINT length)
-            : m_data(buffer.data(offset)),
-              m_length(length) {
+                : m_span{std::move(buffer.span().subspan(
+                          static_cast<std::size_t>(offset),
+                          static_cast<std::size_t>(offset)))} {
             DEBUG_ASSERT((buffer.size() - offset) >= length);
         }
         const CSAMPLE* data(SINT offset = 0) const {
-            DEBUG_ASSERT((m_data != nullptr) || (offset == 0));
-            DEBUG_ASSERT(0 <= offset);
-            // >=: allow access to one element behind allocated memory
-            DEBUG_ASSERT(m_length >= offset);
-            return m_data + offset;
+            DEBUG_ASSERT(m_span.size() >= offset);
+            return m_span.subspan(offset).data();
         }
         SINT length(SINT offset = 0) const {
-            DEBUG_ASSERT(0 <= offset);
-            // >=: allow access to one element behind allocated memory
-            DEBUG_ASSERT(m_length >= offset);
-            return m_length - offset;
+            return m_span.size() - offset;
         }
         bool empty() const {
-            return (m_data == nullptr) || (m_length <= 0);
+            return m_span.empty();
         }
         const CSAMPLE& operator[](SINT index) const {
-            return *data(index);
+            return m_span[static_cast<std::size_t>(index)];
         }
       private:
-        const CSAMPLE* m_data;
-        SINT m_length;
+        std::span<const CSAMPLE> m_span;
     };
 
     class WritableSlice {
