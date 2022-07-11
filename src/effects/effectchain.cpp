@@ -288,7 +288,7 @@ void EffectChain::registerInputChannel(GroupHandle channelHandle,
     }
 
     auto pEnableControl = std::make_shared<ControlPushButton>(
-            ConfigKey(m_group, QString("group_%1_enable").arg(nameOfGroupHandle(channelHandle))),
+            ConfigKey(m_group, QString("group_%1_enable").arg(channelHandle.name())),
             true,
             initialValue);
     m_channelEnableButtons.insert(channelHandle, pEnableControl);

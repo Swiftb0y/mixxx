@@ -7,6 +7,7 @@
 #include "audio/frame.h"
 #include "audio/types.h"
 #include "control/controlproxy.h"
+#include "control/grouphandle.h"
 #include "library/trackset/crate/crateid.h"
 #include "moc_mixxxapplication.cpp"
 #include "soundio/soundmanagerutil.h"
@@ -105,6 +106,7 @@ void MixxxApplication::registerMetaTypes() {
     qRegisterMetaType<mixxx::audio::FramePos>("mixxx::audio::FramePos");
     qRegisterMetaType<std::optional<mixxx::RgbColor>>("std::optional<mixxx::RgbColor>");
     qRegisterMetaType<mixxx::FileInfo>("mixxx::FileInfo");
+    qRegisterMetaType<GroupHandle>("mixxx::GroupHandle");
 }
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)

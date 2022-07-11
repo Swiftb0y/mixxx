@@ -34,9 +34,9 @@ void ChannelMixer::applyEffectsAndMixChannels(const EngineMaster::GainCalculator
             newGain = gainCalculator.getGain(pChannelInfo);
         }
         gainCache.m_gain = newGain;
-        DEBUG_ASSERT(pChannelInfo->m_pHandle);
+        DEBUG_ASSERT(pChannelInfo->m_handle);
         pEngineEffectsManager->processPostFaderAndMix(
-                pChannelInfo->m_pHandle,
+                pChannelInfo->m_handle,
                 outputHandle,
                 pChannelInfo->m_pBuffer,
                 pOutput,
@@ -78,9 +78,9 @@ void ChannelMixer::applyEffectsInPlaceAndMixChannels(
             newGain = gainCalculator.getGain(pChannelInfo);
         }
         gainCache.m_gain = newGain;
-        DEBUG_ASSERT(pChannelInfo->m_pHandle);
+        DEBUG_ASSERT(pChannelInfo->m_handle);
         pEngineEffectsManager->processPostFaderInPlace(
-                pChannelInfo->m_pHandle,
+                pChannelInfo->m_handle,
                 outputHandle,
                 pChannelInfo->m_pBuffer,
                 iBufferSize,

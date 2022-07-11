@@ -24,7 +24,7 @@ const QString kEffectsXmlFile = QStringLiteral("effects.xml");
 EffectsManager::EffectsManager(
         UserSettingsPointer pConfig)
         : m_pConfig(pConfig),
-          m_masterGroupHandle(getOrCreateGroupHandleByName("[Master]")),
+          m_masterGroupHandle(GroupHandle::getOrCreateByName("[Master]")),
           m_loEqFreq(ConfigKey("[Mixer Profile]", "LoEQFrequency"), 0., 22040),
           m_hiEqFreq(ConfigKey("[Mixer Profile]", "HiEQFrequency"), 0., 22040) {
     qRegisterMetaType<EffectChainMixMode>("EffectChainMixMode");

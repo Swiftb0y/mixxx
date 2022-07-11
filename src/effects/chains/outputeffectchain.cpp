@@ -12,18 +12,18 @@ OutputEffectChain::OutputEffectChain(EffectsManager* pEffectsManager,
     m_effectSlots[0]->setEnabled(true);
 
     // Register the master channel
-    GroupHandle masterHandleAndGroup = nullptr;
-
+    GroupHandle masterHandleAndGroup;
+    DEBUG_ASSERT(!masterHandleAndGroup);
     // TODO(Be): Remove this hideous hack to get the GroupHandle
     const QSet<GroupHandle>& registeredChannels =
             m_pEffectsManager->registeredInputChannels();
     for (GroupHandle handle_group : registeredChannels) {
-        if (nameOfGroupHandle(handle_group) == "[MasterOutput]") {
+        if (handle_group.name() == "[MasterOutput]") {
             masterHandleAndGroup = handle_group;
             break;
         }
     }
-    DEBUG_ASSERT(masterHandleAndGroup != nullptr);
+    DEBUG_ASSERT(masterHandleAndGroup);
 
     registerInputChannel(masterHandleAndGroup);
     enableForInputChannel(masterHandleAndGroup);
