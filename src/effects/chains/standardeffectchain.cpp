@@ -18,7 +18,7 @@ StandardEffectChain::StandardEffectChain(unsigned int iChainNumber,
             m_pEffectsManager->registeredInputChannels();
     for (GroupHandle handle_group : registeredChannels) {
         int deckNumber;
-        if (PlayerManager::isDeckGroup(nameOfGroupHandle(handle_group), &deckNumber) &&
+        if (PlayerManager::isDeckGroup(handle_group.name(), &deckNumber) &&
                 (iChainNumber + 1) == (unsigned)deckNumber) {
             registerInputChannel(handle_group, 1.0);
         } else {

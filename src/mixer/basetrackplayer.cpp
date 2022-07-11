@@ -47,7 +47,7 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(
         bool defaultMaster,
         bool defaultHeadphones,
         bool primaryDeck)
-        : BaseTrackPlayer(pParent, nameOfGroupHandle(groupHandle)),
+        : BaseTrackPlayer(pParent, groupHandle.name()),
           m_pConfig(pConfig),
           m_pEngineMaster(pMixingEngine),
           m_pLoadedTrack(),

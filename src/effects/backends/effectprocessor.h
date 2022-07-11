@@ -178,8 +178,8 @@ class EffectProcessorImpl : public EffectProcessor {
             if (kEffectDebugOutput) {
                 qWarning() << "EffectProcessorImpl::process could not retrieve"
                               "EffectState for input"
-                           << *inputHandle
-                           << "and output" << *outputHandle
+                           << inputHandle
+                           << "and output" << outputHandle
                            << "EffectState should have been preallocated in the"
                               "main thread.";
             }

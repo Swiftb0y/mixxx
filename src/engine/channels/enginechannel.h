@@ -36,7 +36,7 @@ class EngineChannel : public EngineObject {
     }
 
     QString getGroup() const {
-        return nameOfGroupHandle(m_groupHandle);
+        return m_groupHandle.name();
     }
 
     virtual bool isActive() = 0;

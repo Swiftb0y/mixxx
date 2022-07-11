@@ -25,7 +25,7 @@ class ChannelHandleMap {
     }
 
     const T& at(GroupHandle handle) const {
-        const auto index = indexOfGroupHandle(handle);
+        const auto index = handle.index();
         if (index < 0) {
             return m_dummy;
         }
@@ -34,7 +34,7 @@ class ChannelHandleMap {
     }
 
     void insert(GroupHandle handle, const T& value) {
-        const auto index = indexOfGroupHandle(handle);
+        const auto index = handle.index();
         if (index < 0) {
             return;
         }
@@ -43,7 +43,7 @@ class ChannelHandleMap {
     }
 
     T& operator[](GroupHandle handle) {
-        const auto index = indexOfGroupHandle(handle);
+        const auto index = handle.index();
         if (index < 0) {
             return m_dummy;
         }

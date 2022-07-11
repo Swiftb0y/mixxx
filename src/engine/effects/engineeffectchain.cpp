@@ -149,7 +149,7 @@ bool EngineEffectChain::processEffectsRequest(EffectsRequest& message,
 bool EngineEffectChain::enableForInputChannel(GroupHandle inputHandle,
         EffectStatesMapArray* statesForEffectsInChain) {
     if (kEffectDebugOutput) {
-        qDebug() << "EngineEffectChain::enableForInputChannel" << this << *inputHandle;
+        qDebug() << "EngineEffectChain::enableForInputChannel" << this << inputHandle;
     }
     auto& outputMap = m_chainStatusForChannelMatrix[inputHandle];
     for (auto&& outputChannelStatus : outputMap) {

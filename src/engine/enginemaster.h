@@ -49,7 +49,7 @@ class EngineMaster : public QObject, public AudioSource {
     const CSAMPLE* buffer(const AudioOutput& output) const;
 
     GroupHandle registerChannelGroup(const QString& group) {
-        return getOrCreateGroupHandleByName(group);
+        return GroupHandle::getOrCreateByName(group);
     }
 
     // Register the sound I/O that does not correspond to any EngineChannel object
@@ -110,7 +110,7 @@ class EngineMaster : public QObject, public AudioSource {
         explicit ChannelInfo(int index)
                 : m_index(index) {
         }
-        GroupHandle m_pHandle{};
+        GroupHandle m_handle;
         EngineChannel* m_pChannel{};
         CSAMPLE* m_pBuffer{};
         ControlObject* m_pVolumeControl{};

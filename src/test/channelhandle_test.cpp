@@ -10,36 +10,36 @@ TEST(ChannelHandleTest, GroupHandle) {
     const QString group = "[Test]";
     const QString group2 = "[Test2]";
 
-    EXPECT_EQ(nullptr, getGroupHandleByName(group));
-    EXPECT_EQ(0, indexOfGroupHandle(getOrCreateGroupHandleByName(group)));
-    EXPECT_EQ(0, indexOfGroupHandle(getOrCreateGroupHandleByName(group)));
-    GroupHandle testHandle = getGroupHandleByName(group);
-    EXPECT_NE(nullptr, testHandle);
-    EXPECT_EQ(0, indexOfGroupHandle(testHandle));
-    EXPECT_QSTRING_EQ(group, nameOfGroupHandle(testHandle));
-    EXPECT_EQ(*testHandle, *testHandle);
+    EXPECT_FALSE(GroupHandle::getByName(group));
+    EXPECT_EQ(0, GroupHandle::getOrCreateByName(group).index());
+    EXPECT_EQ(0, GroupHandle::getOrCreateByName(group).index());
+    GroupHandle testHandle = GroupHandle::getByName(group);
+    EXPECT_TRUE(testHandle);
+    EXPECT_EQ(0, testHandle.index());
+    EXPECT_QSTRING_EQ(group, testHandle.name());
+    EXPECT_EQ(testHandle, testHandle);
 
-    EXPECT_EQ(nullptr, getGroupHandleByName(group2));
-    EXPECT_EQ(1, indexOfGroupHandle(getOrCreateGroupHandleByName(group2)));
-    EXPECT_EQ(1, indexOfGroupHandle(getOrCreateGroupHandleByName(group2)));
-    GroupHandle testHandle2 = getGroupHandleByName(group2);
-    EXPECT_NE(nullptr, testHandle2);
-    EXPECT_EQ(1, indexOfGroupHandle(testHandle2));
-    EXPECT_QSTRING_EQ(group2, nameOfGroupHandle(testHandle2));
-    EXPECT_EQ(*testHandle2, *testHandle2);
+    EXPECT_FALSE(GroupHandle::getByName(group2));
+    EXPECT_EQ(1, GroupHandle::getOrCreateByName(group2).index());
+    EXPECT_EQ(1, GroupHandle::getOrCreateByName(group2).index());
+    GroupHandle testHandle2 = GroupHandle::getByName(group2);
+    EXPECT_TRUE(testHandle2);
+    EXPECT_EQ(1, testHandle2.index());
+    EXPECT_QSTRING_EQ(group2, testHandle2.name());
+    EXPECT_EQ(testHandle2, testHandle2);
 
-    EXPECT_NE(*testHandle, *testHandle2);
+    EXPECT_NE(testHandle, testHandle2);
 }
 
 TEST(ChannelHandleTest, ChannelHandleMap) {
     resetAllGroupHandles();
 
-    GroupHandle test = getOrCreateGroupHandleByName("[Test]");
-    GroupHandle test2 = getOrCreateGroupHandleByName("[Test2]");
+    GroupHandle test = GroupHandle::getOrCreateByName("[Test]");
+    GroupHandle test2 = GroupHandle::getOrCreateByName("[Test2]");
 
     ChannelHandleMap<QString> map;
 
-    EXPECT_QSTRING_EQ(QString(), map.at(nullptr));
+    EXPECT_QSTRING_EQ(QString(), map.at({}));
 
     map.insert(test2, "bar");
     EXPECT_QSTRING_EQ("bar", map.at(test2));
