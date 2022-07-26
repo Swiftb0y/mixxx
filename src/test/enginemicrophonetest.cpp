@@ -23,7 +23,7 @@ class EngineMicrophoneTest : public SignalPathTest {
         test = SampleUtil::alloc(outputLength);
 
         // No need for a real handle in this test.
-        const auto groupHandle = getOrCreateGroupHandleByName("[Microphone]");
+        const auto groupHandle = GroupHandle::getOrCreateByName("[Microphone]");
         m_pMicrophone = new EngineMicrophone(groupHandle, m_pEffectsManager);
         m_pTalkover = ControlObject::getControl(ConfigKey("[Microphone]", "talkover"));
     }

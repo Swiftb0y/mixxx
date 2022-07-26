@@ -8,21 +8,9 @@
 
 namespace mixxx {
 namespace grouphandle_private {
-class Descriptor;
+struct GroupHandleImpl;
 } // namespace grouphandle_private
 } // namespace mixxx
-
-typedef const mixxx::grouphandle_private::Descriptor* GroupHandle;
-
-constexpr GroupHandle kNullGroupHandle = nullptr;
-
-GroupHandle getOrCreateGroupHandleByName(
-        const QString& name,
-        bool create = true);
-
-inline GroupHandle getGroupHandleByName(const QString& name) {
-    return getOrCreateGroupHandleByName(name, false);
-}
 
 /// Finalize the registration of groups
 ///
@@ -38,100 +26,64 @@ void freezeAllGroupHandles();
 /// Returns the number of groups.
 int resetAllGroupHandles();
 
-namespace mixxx {
-namespace grouphandle_private {
+/// An opaque handle.
+///
+/// Instances should be passed by value.
+///
+/// TODO: Move into mixxx namespace.
+class GroupHandle final {
+    friend struct mixxx::grouphandle_private::GroupHandleImpl;
+    friend int resetAllGroupHandles();
 
-class Descriptor final {
   public:
-    static constexpr int kInvalidIndex = -1;
-
-    // Trailing return type declaration is required for Clang 14
-    friend auto ::getOrCreateGroupHandleByName(
+    static GroupHandle getOrCreateByName(
             const QString& name,
-            bool create) -> GroupHandle;
+            bool create = true);
 
-    Descriptor() = default;
-    Descriptor(Descriptor&&) = delete;
-    Descriptor(const Descriptor&) = delete;
-    Descriptor& operator=(Descriptor&&) = delete;
-    Descriptor& operator=(const Descriptor&) = delete;
+    static GroupHandle getByName(const QString& name) {
+        return getOrCreateByName(name, false);
+    }
+
+    GroupHandle() = default;
+
+    operator bool() const {
+        return m_pImpl != nullptr;
+    }
 
     /// Index
     ///
     /// 0-based integer identifier. The maximum number is limited by the
     /// total number of different descriptors, i.e. the total number of
     /// distinct group names.
-    friend int indexOfGroupHandle(GroupHandle handle) {
-        if (!handle) {
-            return kInvalidIndex;
-        }
-        DEBUG_ASSERT(handle->valid());
-        return handle->m_index;
-    }
+    int index() const;
 
     /// Group name
     ///
     /// String identifier.
-    friend QString nameOfGroupHandle(GroupHandle handle) {
-        if (!handle) {
-            return {};
-        }
-        DEBUG_ASSERT(handle->valid());
-        return handle->m_name;
+    QString name() const;
+
+    friend bool operator<(GroupHandle lhs, GroupHandle rhs);
+    friend bool operator==(GroupHandle lhs, GroupHandle rhs) {
+        return lhs.m_pImpl == rhs.m_pImpl;
     }
 
-    friend bool operator<(const Descriptor& lhs, const Descriptor& rhs) {
-        return lhs.m_index < rhs.m_index;
+    friend qhash_seed_t qHash(GroupHandle arg, qhash_seed_t seed = 0) {
+        return arg.qHashImpl(seed);
     }
 
-    friend bool operator==(const Descriptor& lhs, const Descriptor& rhs) {
-        return lhs.m_index == rhs.m_index;
-    }
-
-    friend qhash_seed_t qHash(const Descriptor& arg, qhash_seed_t seed = 0) {
-        return qHash(arg.m_index, seed);
-    }
-
-    friend QDebug operator<<(QDebug dbg, const Descriptor& arg);
+    friend QDebug operator<<(QDebug dbg, GroupHandle arg);
 
   private:
-    bool valid() const {
-        DEBUG_ASSERT(m_index == kInvalidIndex || m_index >= 0);
-        DEBUG_ASSERT((m_index == kInvalidIndex) == m_name.isEmpty());
-        return m_index != kInvalidIndex;
-    }
+    explicit GroupHandle(mixxx::grouphandle_private::GroupHandleImpl* pImpl);
 
-    Descriptor(int index, QString name)
-            : m_index(index),
-              m_name(std::move(name)) {
-    }
+    qhash_seed_t qHashImpl(qhash_seed_t seed) const;
 
-    int m_index = kInvalidIndex;
-    QString m_name;
+    mixxx::grouphandle_private::GroupHandleImpl* m_pImpl{};
 };
 
-inline bool operator!=(
-        const Descriptor& lhs,
-        const Descriptor& rhs) {
+inline bool operator!=(GroupHandle lhs, GroupHandle rhs) {
     return !(lhs == rhs);
 }
 
-} // namespace grouphandle_private
-
-} // namespace mixxx
-
-inline qhash_seed_t qHash(GroupHandle arg, qhash_seed_t seed = 0) {
-    if (arg) {
-        return qHash(*arg, seed);
-    } else {
-        return qHash(mixxx::grouphandle_private::Descriptor{}, seed);
-    }
-}
-
-inline QDebug operator<<(QDebug dbg, GroupHandle arg) {
-    if (arg) {
-        return dbg << *arg;
-    } else {
-        return dbg << mixxx::grouphandle_private::Descriptor{};
-    }
-}
+Q_DECLARE_TYPEINFO(GroupHandle, Q_MOVABLE_TYPE);
+Q_DECLARE_METATYPE(GroupHandle)

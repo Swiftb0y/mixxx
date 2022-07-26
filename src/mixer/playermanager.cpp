@@ -436,7 +436,7 @@ void PlayerManager::addDeckInner() {
             AudioInput(AudioInput::VINYLCONTROL, 0, 2, deckIndex), pEngineDeck);
 
     // Setup equalizer and QuickEffect chain for this deck.
-    m_pEffectsManager->addDeck(nameOfGroupHandle(groupHandle));
+    m_pEffectsManager->addDeck(groupHandle.name());
 
     // Setup EQ ControlProxies used for resetting EQs on track load
     pDeck->setupEqControls();
