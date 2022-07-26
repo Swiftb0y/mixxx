@@ -98,7 +98,7 @@ GroupHandle GroupHandle::getOrCreateByName(const QString& name, bool create) {
             const auto groupHandle =
                     GroupHandle{
                             new mixxx::grouphandle_private::GroupHandleImpl{
-                                    index, std::move(name)}};
+                                    index, name}};
             allGroupHandlesByName.insert(name, groupHandle);
             // Unlock mutex before logging (I/O)
             locked.unlock();
