@@ -140,3 +140,11 @@ repos:
     - Markdown==3.3.4
     types: [text]
     files: ^(CHANGELOG\.md|res/linux/org\.mixxx\.Mixxx\.metainfo.xml)$
+
+ci:
+    autofix_prs: false
+    autoupdate_branch: '2.3'
+    autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+    autoupdate_schedule: monthly
+    skip: ["no-commit-to-branch"]
+    submodules: false
