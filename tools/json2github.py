@@ -159,22 +159,19 @@ LAUNCHPAD_USER_MAP = {
     "zezic": "zezic",
 }
 
-# Github has restrictions on assignees
-# Since this script was made to import to a private repo and transfer over
-# afterwards, most assignees would be invalid and so we won't use them.
 GITHUB_ALLOWED_ASSIGNEES = {
-    # "Holzhaus",
-    # "asantoni",
-    # "Be-ing",
-    # "daschuer",
-    # "esbrandt",
-    # "Pegasus-RPG",
-    # "ronso0",
-    # "rryan",
-    # "sblaisot",
-    # "Swiftb0y",
-    # "uklotzde",
-    # "ywwg",
+    "Holzhaus",
+    "asantoni",
+    "Be-ing",
+    "daschuer",
+    "esbrandt",
+    "Pegasus-RPG",
+    "ronso0",
+    "rryan",
+    "sblaisot",
+    "Swiftb0y",
+    "uklotzde",
+    "ywwg",
 }
 
 LABELS = {
@@ -452,6 +449,7 @@ class LaunchpadImporter:
                     abuse_timeout *= EXP_BACKUP_EXPONENT
                 else:
                     raise
+            # TODO except socketerror
             else:
                 break
 
@@ -522,7 +520,6 @@ class LaunchpadImporter:
                 ]
             )
         assignee = self.name_to_assignee(issuedata["assignee"])
-        # todo upload attachments here
         issue = self.handle_ratelimit(
             lambda: self.repo.create_issue(
                 title=issuedata["title"],
@@ -554,12 +551,14 @@ class LaunchpadImporter:
             if gh_issue_number:
 
                 issue_milestone = issuedata["milestone"]
+                issue_assignee = issuedata["assignee"]
 
                 if (
                     issuedata.get("gh_comments_imported")
                     == len(issuedata["comments"])
                     and issuedata.get("gh_status_comment_imported", False)
                     and issue_milestone is None
+                    and issue_assignee is None
                 ):
                     continue
 
@@ -577,11 +576,24 @@ class LaunchpadImporter:
                         f'"{issue_milestone}" for '
                         f"issue #{gh_issue_number}"
                     )
+
+                assignee = self.name_to_assignee(issue_assignee)
+                if assignee not in issue.assignees:
+                    self.logger.info(
+                        f"fixing up assignee "
+                        f'"{assignee}" for '
+                        f"issue #{gh_issue_number}"
+                    )
+                if (issue.milestone != milestone) or (
+                    assignee not in issue.assignees
+                ):
                     # issue on launchpad is attached to milestone
                     # but corresponding pre-existing issue on gh does not
-                    # have the milestone. Attach it here.
+                    # have the milestone. Attach it here. same for assignee
                     self.handle_ratelimit(
-                        lambda: issue.edit(milestone=milestone)
+                        lambda: issue.edit(
+                            milestone=milestone, assignee=assignee
+                        )
                     )
             else:
                 issue = self.import_issue(issuedata)
