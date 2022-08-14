@@ -26,8 +26,8 @@ class EngineEffectChain final : public EffectsRequestHandler {
   public:
     /// called from main thread
     EngineEffectChain(const QString& group,
-            const QSet<ChannelHandleAndGroup>& registeredInputChannels,
-            const QSet<ChannelHandleAndGroup>& registeredOutputChannels);
+            const QSet<GroupHandle>& registeredInputChannels,
+            const QSet<GroupHandle>& registeredOutputChannels);
     /// called from main thread
     ~EngineEffectChain();
 
@@ -37,8 +37,9 @@ class EngineEffectChain final : public EffectsRequestHandler {
             EffectsResponsePipe* pResponsePipe) override;
 
     /// called from audio thread
-    bool process(const ChannelHandle& inputHandle,
-            const ChannelHandle& outputHandle,
+    bool process(
+            GroupHandle inputHandle,
+            GroupHandle outputHandle,
             CSAMPLE* pIn,
             CSAMPLE* pOut,
             const unsigned int numSamples,
@@ -46,7 +47,7 @@ class EngineEffectChain final : public EffectsRequestHandler {
             const GroupFeatureState& groupFeatures);
 
     /// called from main thread
-    void deleteStatesForInputChannel(const ChannelHandle channel);
+    void deleteStatesForInputChannel(GroupHandle inputHandle);
 
   private:
     struct ChannelStatus {
@@ -65,14 +66,15 @@ class EngineEffectChain final : public EffectsRequestHandler {
     bool updateParameters(const EffectsRequest& message);
     bool addEffect(EngineEffect* pEffect, int iIndex);
     bool removeEffect(EngineEffect* pEffect, int iIndex);
-    bool enableForInputChannel(ChannelHandle inputHandle,
+    bool enableForInputChannel(GroupHandle inputHandle,
             EffectStatesMapArray* statesForEffectsInChain);
-    bool disableForInputChannel(ChannelHandle inputHandle);
+    bool disableForInputChannel(GroupHandle inputHandle);
 
     // Gets or creates a ChannelStatus entry in m_channelStatus for the provided
     // handle.
-    ChannelStatus& getChannelStatus(const ChannelHandle& inputHandle,
-            const ChannelHandle& outputHandle);
+    ChannelStatus& getChannelStatus(
+            GroupHandle inputHandle,
+            GroupHandle outputHandle);
 
     QString m_group;
     EffectEnableState m_enableState;
