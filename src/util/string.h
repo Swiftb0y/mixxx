@@ -71,32 +71,26 @@ inline std::size_t wcsnlen_s(
 #endif
 }
 
-/// Convert a wide-character C string to QString.
+/// @brief Convert a wide-character C string to QString.
 ///
-/// We cannot use Qts wchar_t functions, since they may work or not
-/// depending on the '/Zc:wchar_t-' build flag in the Qt configs
-/// on Windows build.
-///
-/// See also: QString::fromWCharArray()
+/// @param wcs
+/// @param maxLen maximum numbers of characters
+/// @return
 inline QString convertWCStringToQString(
         const wchar_t* wcs,
         std::size_t len) {
-    if (!wcs) {
-        DEBUG_ASSERT(len == 0);
+    if (wcs == nullptr) {
         return QString();
     }
-    DEBUG_ASSERT(wcsnlen_s(wcs, len) == len);
-    const auto ilen = static_cast<int>(len);
-    DEBUG_ASSERT(ilen >= 0); // unsigned -> signed
-    switch (sizeof(wchar_t)) {
-    case sizeof(char16_t):
-        return QString::fromUtf16(reinterpret_cast<const char16_t*>(wcs), ilen);
-    case sizeof(char32_t):
-        return QString::fromUcs4(reinterpret_cast<const char32_t*>(wcs), ilen);
-    default:
-        DEBUG_ASSERT(!"unsupported character type");
-        return QString();
-    }
+    const std::size_t wstr_len = wcsnlen_s(wcs, len);
+    const auto iLen = static_cast<int>(wstr_len);
+
+    // ensure the string is not truncated
+    DEBUG_ASSERT(wstr_len != len);
+    // assert no underflow occurred from size_t to int cast
+    DEBUG_ASSERT(iLen >= 0);
+
+    return QString::fromWCharArray(wcs, iLen);
 }
 
 } // namespace mixxx
