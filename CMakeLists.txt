@@ -1166,7 +1166,7 @@ if(APPLE)
   # will automatically insert retain/release calls on Objective-C objects.
   target_compile_options(mixxx-lib PUBLIC -fobjc-arc)
 
-  option(MACOS_ITUNES_LIBRARY "Native macOS iTunes/Music.app library integration" ON)
+  option(MACOS_ITUNES_LIBRARY "Native macOS iTunes/Music.app library integration" OFF)
   if(MACOS_ITUNES_LIBRARY)
     target_sources(mixxx-lib PRIVATE
       src/library/itunes/itunesmacosimporter.mm
