@@ -16,7 +16,6 @@
        Control:off
        Deck:off
  */
-/*eslint no-var:off */
 
 // ----------------- Prototype enhancements ---------------------
 
@@ -56,9 +55,9 @@ var stringifyObject = function(obj, maxdepth, checked, prefix) {
         if (maxdepth > 0 && typeof obj === "object" && obj !== null &&
             Object.getPrototypeOf(obj) !== "" && !arrayContains(checked, obj)) {
             checked.push(obj);
-            var output = "{\n";
-            for (var property in obj) {
-                var value = obj[property];
+            let output = "{\n";
+            for (const property in obj) {
+                const value = obj[property];
                 if (typeof value === "function") { continue; }
                 output += prefix + property + ": "
                     + stringifyObject(value, maxdepth - 1, checked, prefix + "  ")
@@ -71,7 +70,7 @@ var stringifyObject = function(obj, maxdepth, checked, prefix) {
 };
 
 var arrayContains = function(array, elem) {
-    for (var i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
         if (array[i] === elem) { return true; }
     }
     return false;
@@ -533,8 +532,8 @@ bpm.tapButton = function(deck) {
     bpm.tap.push(60 / tapDelta);
     // Keep the last 8 samples for averaging
     if (bpm.tap.length > 8) { bpm.tap.shift(); }
-    var sum = 0;
-    for (var i=0; i<bpm.tap.length; i++) {
+    let sum = 0;
+    for (let i=0; i<bpm.tap.length; i++) {
         sum += bpm.tap[i];
     }
     const average = sum / bpm.tap.length;
