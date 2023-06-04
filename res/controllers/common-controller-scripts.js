@@ -36,6 +36,7 @@ String.prototype.toInt = function() {
  * @param {string} message - The log message.
  * @deprecated Use console.log()/console.warn()/console.debug() instead.
  */
+
 var print = function(message) {
     console.log(message);
 };
@@ -44,6 +45,7 @@ var print = function(message) {
 var printObject = function(obj, maxdepth) {
     print(stringifyObject(obj, maxdepth));
 };
+
 
 var stringifyObject = function(obj, maxdepth, checked, prefix) {
     if (!maxdepth) { maxdepth = 2; }
@@ -68,6 +70,7 @@ var stringifyObject = function(obj, maxdepth, checked, prefix) {
     }
     return obj;
 };
+
 
 var arrayContains = function(array, elem) {
     for (let i = 0; i < array.length; i++) {
@@ -491,6 +494,7 @@ script.softStart = function(channel, control, value, status, group, factor) {
 };
 
 // bpm - Used for tapping the desired BPM for a deck
+
 var bpm = function() {
 };
 
@@ -565,11 +569,13 @@ script.individualEffectRegEx = /^\[EffectRack1_EffectUnit(\d+)_Effect(\d+)\]$/;
 // ----------------- Object definitions --------------------------
 
 
+
 var ButtonState = {"released": 0x00, "pressed": 0x7F};
 // eslint-disable-next-line no-unused-vars
 var LedState = {"off": 0x00, "on": 0x7F};
 
 // Controller
+
 var Controller = function() {
     this.group = "[Master]";
     this.Controls = [];
@@ -593,6 +599,7 @@ Controller.prototype.setControlValue = function(control, value) {
 };
 
 // Button
+
 var Button = function(controlId) {
     this.controlId = controlId;
     this.state = ButtonState.released;
@@ -602,6 +609,7 @@ Button.prototype.handleEvent = function(value) {
 };
 
 // Control
+
 var Control = function(mappedFunction, softMode) {
     // These defaults are for MIDI controllers
     this.minInput = 0;
@@ -650,6 +658,7 @@ Control.prototype.setValue = function(group, inputValue) {
 };
 
 // Deck
+
 var Deck = function(deckNumber, group) {
     this.deckNumber = deckNumber;
     this.group = group;
