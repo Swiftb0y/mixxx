@@ -70,28 +70,28 @@ void ControllerScriptEngineBase::reload() {
 }
 
 bool ControllerScriptEngineBase::executeFunction(
-        QJSValue* pFunctionObject, const QJSValueList& args) {
+        QJSValue functionObject, const QJSValueList& args) {
     // This function is called from outside the controller engine, so we can't
     // use VERIFY_OR_DEBUG_ASSERT here
     if (!m_pJSEngine) {
         return false;
     }
 
-    if (pFunctionObject->isError()) {
+    if (functionObject.isError()) {
         qDebug() << "ControllerScriptHandlerBase::executeFunction:"
-                 << pFunctionObject->toString();
+                 << functionObject.toString();
         return false;
     }
 
     // If it's not a function, we're done.
-    if (!pFunctionObject->isCallable()) {
+    if (!functionObject.isCallable()) {
         qDebug() << "ControllerScriptHandlerBase::executeFunction:"
-                 << pFunctionObject->toVariant() << "Not a function";
+                 << functionObject.toVariant() << "Not a function";
         return false;
     }
 
     // If it does happen to be a function, call it.
-    QJSValue returnValue = pFunctionObject->call(args);
+    QJSValue returnValue = functionObject.call(args);
     if (returnValue.isError()) {
         showScriptExceptionDialog(returnValue);
         return false;

@@ -541,12 +541,12 @@ void ControllerScriptInterfaceLegacy::timerEvent(QTimerEvent* event) {
     // why but this causes segfaults in ~QScriptValue while scratching if we
     // don't copy here -- even though internalExecute passes the QScriptValues
     // by value. *boggle*
-    TimerInfo timerTarget = it.value();
+    const TimerInfo timerTarget = it.value();
     if (timerTarget.oneShot) {
         stopTimer(timerId);
     }
 
-    m_pScriptEngineLegacy->executeFunction(&timerTarget.callback);
+    m_pScriptEngineLegacy->executeFunction(timerTarget.callback);
 }
 
 void ControllerScriptInterfaceLegacy::softTakeover(

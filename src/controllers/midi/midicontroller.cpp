@@ -280,7 +280,7 @@ void MidiController::processInputMapping(const MidiInputMapping& mapping,
                 status,
                 mapping.control.group,
         };
-        if (!pEngine->executeFunction(&function, args)) {
+        if (!pEngine->executeFunction(function, args)) {
             qCWarning(m_logBase) << "MidiController: Invalid script function"
                                  << mapping.control.item;
         }
