@@ -63,11 +63,18 @@
 
 #if false
 
-static mach_timebase_info_data_t info = {0, 0};
-static std::chrono::nanoseconds absoluteToNSecs(qint64 cpuTime) {
-    if (info.denom == 0)
+static double multiplier = 0.0;
+static double getMultiplier() {
+    if (multiplier == 0.0) [[unlikely]] {
+        mach_timebase_info_data_t info = {0, 0};
         mach_timebase_info(&info);
-    return std::chrono::nanoseconds(cpuTime * info.numer / info.denom);
+        multiplier = static_cast<double>(info.numer) / static_cast<double>(info.denom);
+    }
+    return multiplier;
+}
+
+static std::chrono::nanoseconds absoluteToNSecs(qint64 cpuTime) {
+    return std::chrono::nanoseconds(static_cast<double>(cpuTime) * getMultiplier());
 }
 
 auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {

@@ -63,12 +63,18 @@
 ////////////////////////////// Mac //////////////////////////////
 #if false
 
-static mach_timebase_info_data_t info = {0, 0};
-static qint64 absoluteToNSecs(qint64 cpuTime) {
-    if (info.denom == 0)
+static double multiplier = 0.0;
+static double getMultiplier() {
+    if (multiplier == 0.0) [[unlikely]] {
+        mach_timebase_info_data_t info = {0, 0};
         mach_timebase_info(&info);
-    qint64 nsecs = cpuTime * info.numer / info.denom;
-    return nsecs;
+        multiplier = static_cast<double>(info.numer) / static_cast<double>(info.denom);
+    }
+    return multiplier;
+}
+
+static qint64 absoluteToNSecs(qint64 cpuTime) {
+    return static_cast<qint64>(static_cast<double>(cpuTime) * getMultiplier());
 }
 
 void PerformanceTimerLegacy::start() {

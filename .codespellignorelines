@@ -62,4 +62,4 @@ void EngineEffectsDelay::process(CSAMPLE* pInOut,
     mixxx::SampleBuffer pInOut(bufferSizeInSamples);
     SampleUtil::fill(pInOut.data(), 0.0f, bufferSizeInSamples);
         effectsDelay.process(pInOut.data(), bufferSizeInSamples);
-    return std::chrono::nanoseconds(cpuTime * info.numer / info.denom);
+        multiplier = static_cast<double>(info.numer) / static_cast<double>(info.denom);
