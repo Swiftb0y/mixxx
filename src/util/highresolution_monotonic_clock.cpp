@@ -63,22 +63,8 @@
 
 #if false
 
-static double multiplier = 0.0;
-static double getMultiplier() {
-    if (multiplier == 0.0) [[unlikely]] {
-        mach_timebase_info_data_t info = {0, 0};
-        mach_timebase_info(&info);
-        multiplier = static_cast<double>(info.numer) / static_cast<double>(info.denom);
-    }
-    return multiplier;
-}
-
-static std::chrono::nanoseconds absoluteToNSecs(qint64 cpuTime) {
-    return std::chrono::nanoseconds(static_cast<double>(cpuTime) * getMultiplier());
-}
-
 auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
-    return time_point(absoluteToNSecs(mach_absolute_time()));
+    return time_point(std::chrono::nanoseconds(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)));
 }
 
 #elif defined(Q_OS_UNIX) || defined(Q_OS_MAC)
