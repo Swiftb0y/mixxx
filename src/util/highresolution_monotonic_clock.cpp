@@ -61,14 +61,32 @@
 
 // mac/unix code heavily copied from QElapsedTimer
 
-#if false
+#if defined(Q_OS_MAC)
 
-auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
-    return time_point(std::chrono::nanoseconds(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)));
+static double multiplier = 0.0;
+static double getMultiplier() {
+    if (multiplier == 0.0) [[unlikely]] {
+        mach_timebase_info_data_t info = {0, 0};
+        mach_timebase_info(&info);
+        multiplier = static_cast<double>(info.numer) / static_cast<double>(info.denom);
+    }
+    return multiplier;
 }
 
-#elif defined(Q_OS_UNIX) || defined(Q_OS_MAC)
+static std::chrono::nanoseconds absoluteToNSecs(qint64 cpuTime) {
+    double mult = getMultiplier();
+    if (mult == 1.0) [[likely]] {
+        return std::chrono::nanoseconds(cpuTime);
+    } else {
+        return std::chrono::nanoseconds(static_cast<qint64>(static_cast<double>(cpuTime) * mult));
+    }
+}
 
+auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
+    return time_point(absoluteToNSecs(mach_absolute_time()));
+}
+
+#elif defined(Q_OS_UNIX)
 // #if (_POSIX_MONOTONIC_CLOCK - 0 != 0)
 // static std::atomic<bool> monotonicClockChecked = true;
 // static std::atomic<bool> monotonicClockAvailable = _POSIX_MONOTONIC_CLOCK > 0;
