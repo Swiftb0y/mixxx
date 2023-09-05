@@ -17,7 +17,6 @@ class BulkReader : public QThread {
     Q_OBJECT
   public:
     BulkReader(libusb_device_handle *handle, unsigned char in_epaddr);
-    virtual ~BulkReader();
 
     void stop();
 

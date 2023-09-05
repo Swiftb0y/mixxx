@@ -15,9 +15,6 @@ BulkReader::BulkReader(libusb_device_handle *handle, unsigned char in_epaddr)
           m_in_epaddr(in_epaddr) {
 }
 
-BulkReader::~BulkReader() {
-}
-
 void BulkReader::stop() {
     m_stop = 1;
 }
@@ -230,18 +227,19 @@ void BulkController::send(const QList<int>& data, unsigned int length) {
 }
 
 void BulkController::sendBytes(const QByteArray& data) {
-    int ret;
     int transferred;
-
-    // XXX: don't get drunk again.
-    ret = libusb_bulk_transfer(m_phandle, out_epaddr,
-                               (unsigned char *)data.constData(), data.size(),
-                               &transferred, 0);
+    int ret = libusb_bulk_transfer(m_phandle, out_epaddr,
+            // casting away const here should be safe because libusb_bulk_transfer
+            // should only read from the buffer
+            reinterpret_cast<unsigned char*>(const_cast<char*>(data.constData())),
+            data.size(),
+            &transferred,
+            0);
     if (ret < 0) {
         qCWarning(m_logOutput) << "Unable to send data to" << getName()
-                               << "serial #" << m_sUID;
+                               << "serial #" << m_sUID << ":" << libusb_error_name(ret);
     } else {
-        qCDebug(m_logOutput) << ret << "bytes sent to" << getName()
+        qCDebug(m_logOutput) << transferred << "bytes of" << data.size() << "sent to" << getName()
                              << "serial #" << m_sUID;
     }
 }
