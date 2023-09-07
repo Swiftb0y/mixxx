@@ -123,13 +123,15 @@ HerculesMp3.init = function (id) { // called when the device is opened & set up
 //  a timer and a buffer will rectify this.
 //  Setting it to 20ms instead of 11ms as this first is the lowest value accepted for a timer.
 
-    engine.beginTimer(20, "HerculesMp3.ledhelper()");
+    print("calling beginTimer from init for ledhelper");
+    engine.beginTimer(20, HerculesMp3.ledhelper);
 
 
 //  Be the leds!
 
     HerculesMp3.leds(true);
-    engine.beginTimer(500, "HerculesMp3.leds(false)",true);
+    print("calling beginTimer from init for leds");
+    engine.beginTimer(500, function () {HerculesMp3.leds(false); },true);
 
 //  Connect leds here and not in xml. This is to avoid an annoying bug (maybe) in controller drivers.
 
@@ -193,7 +195,10 @@ HerculesMp3.leds = function (onoff) {
 HerculesMp3.ledblink = function (control,onoff){
     if(onoff) {
         actual_status = HerculesMp3.controls.outputs[control].status;
-        blinktimer[control] = engine.beginTimer(300,"HerculesMp3.ledblinkhelper("+control+")");
+        print("calling beginTimer from ledblink");
+        blinktimer[control] = engine.beginTimer(300, function() {
+            HerculesMp3.led(control,!HerculesMp3.controls.outputs[control].status);
+        });
         HerculesMp3.controls.outputs[control].isblinking = true;
     }
     else
@@ -204,15 +209,6 @@ HerculesMp3.ledblink = function (control,onoff){
             HerculesMp3.led(control,actual_status);
         }
     }
-};
-
-HerculesMp3.ledblinkhelper = function (control){
-    var ledval = true;
-    if (HerculesMp3.controls.outputs[control].status)
-        {
-        ledval = false;
-        }
-    HerculesMp3.led(control,ledval);
 };
 
 HerculesMp3.pfl_left = function(value) {
@@ -287,7 +283,8 @@ HerculesMp3.loophold = function (deck) {
 HerculesMp3.loop = function (deck, control, value) {
     if(value) {
         is_hold_loop[deck] = false;
-        timerloopID[deck] = engine.beginTimer(700,"HerculesMp3.loophold("+deck+")",true);
+        print("calling beginTimer from loop");
+        timerloopID[deck] = engine.beginTimer(700, function () {HerculesMp3.loophold(deck)},true);
     }
     else {
         engine.stopTimer(timerloopID[deck]);
@@ -329,7 +326,11 @@ HerculesMp3.hotcue = function (deck, control, value) {
     hotcue_string = HerculesMp3.fxbutton(HerculesMp3.controls.inputs[control].name);
     if(value){
         is_hold_hotcue[control] = false;
-        timerhotcueID[control] = engine.beginTimer(500,"HerculesMp3.hchold("+deck+","+control+","+"\""+hotcue_string+"\")",true);
+        print("calling beginTimer from hotcue");
+        timerhotcueID[control] = engine.beginTimer(500, function() {
+            is_hold_hotcue[control]=true;
+            engine.setValue("[Channel"+deck+"]",hotcuestr+"clear",1);
+         },true);
     }
     else {
         engine.stopTimer(timerhotcueID[control]);
@@ -340,11 +341,6 @@ HerculesMp3.hotcue = function (deck, control, value) {
     }
 };
 
-
-HerculesMp3.hchold = function (deck,control,hotcuestr){
-    is_hold_hotcue[control]=true;
-    engine.setValue("[Channel"+deck+"]",hotcuestr+"clear",1);
-};
 
 
 //Cycle between kill,cue,loop,fx
@@ -554,9 +550,13 @@ HerculesMp3.jog_wheel = function (group, control, value, status) {
         }
 
         if(engine.getValue(Deck[n],"scratch2_enable"))
-        {
+        {   
+            print("calling beginTimer from jog_wheel");
             //when not moved for 200 msecs, probably we are not touching the wheel anymore
-            scratch_timer[n] = engine.beginTimer(200,"HerculesMp3.jog_wheelhelper("+n+")",true);
+            scratch_timer[n] = engine.beginTimer(200, function() {
+                engine.scratchDisable(n);
+                scratch_timer_on[n] = false;
+            },true);
             scratch_timer_on[n] = true;
         }
     }
@@ -572,11 +572,6 @@ HerculesMp3.jog_wheel = function (group, control, value, status) {
     }
 };
 
-
-HerculesMp3.jog_wheelhelper = function(n) {
-    engine.scratchDisable(n);
-    scratch_timer_on[n] = false;
-}
 
 HerculesMp3.joystick = function (group, control, value, status) {
     if(!value)
