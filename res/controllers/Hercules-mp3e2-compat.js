@@ -5,7 +5,7 @@ MP3e2.init = function(id) {
 }
 
 // Debug switch. set to true to print debug log messages in console.
-var debug=false;
+var debug=true;
 
 var c1 = '[Channel1]'
 var c2 = '[Channel2]'
