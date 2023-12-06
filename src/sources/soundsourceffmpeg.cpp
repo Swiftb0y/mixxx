@@ -939,7 +939,7 @@ bool SoundSourceFFmpeg::adjustCurrentPosition(SINT startIndex) {
     // sample accurate decoding the actual seek position must be
     // placed BEFORE the position where reading continues.
     // At the beginning of the stream, this is a negative position.
-    auto seekIndex = startIndex - m_seekPrerollFrameCount;
+    SINT seekIndex = std::max(startIndex - m_seekPrerollFrameCount, (SINT)0);
 
     // Seek to codec frame boundaries if the frame size is fixed and known
     if (m_pavStream->codecpar->frame_size > 0) {
