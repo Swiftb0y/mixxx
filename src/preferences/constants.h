@@ -7,7 +7,6 @@ namespace mixxx {
 
 namespace preferences {
 
-namespace constants {
 Q_NAMESPACE
 
 // In order for this Q_NAMESPACE to work, all members of the namespace must
@@ -15,12 +14,12 @@ Q_NAMESPACE
 
 // Don't change these constants since they are stored in user configuration
 // files.
-enum class Tooltips {
+enum class TooltipMode {
     Off = 0,
     On = 1,
     OnlyInLibrary = 2,
 };
-Q_ENUM_NS(Tooltips);
+Q_ENUM_NS(TooltipMode);
 
 // Settings to enable or disable the prevention to run the screensaver.
 enum class ScreenSaver {
@@ -39,6 +38,5 @@ enum class MultiSamplingMode {
 };
 Q_ENUM_NS(MultiSamplingMode);
 
-} // namespace constants
 } // namespace preferences
 } // namespace mixxx

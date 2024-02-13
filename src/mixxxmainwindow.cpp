@@ -96,7 +96,7 @@ MixxxMainWindow::MixxxMainWindow(std::shared_ptr<mixxx::CoreServices> pCoreServi
 #endif
           m_pDeveloperToolsDlg(nullptr),
           m_pPrefDlg(nullptr),
-          m_toolTipsCfg(mixxx::preferences::constants::Tooltips::On) {
+          m_toolTipsMode(mixxx::preferences::TooltipMode::On) {
     DEBUG_ASSERT(pCoreServices);
     // These depend on the settings
 #ifdef __LINUX__
@@ -170,12 +170,12 @@ void MixxxMainWindow::initialize() {
     UserSettingsPointer pConfig = m_pCoreServices->getSettings();
 
     // Set the visibility of tooltips, default "1" = ON
-    m_toolTipsCfg = pConfig->getValue(
+    m_toolTipsMode = pConfig->getValue(
             ConfigKey("[Controls]", "Tooltips"),
-            mixxx::preferences::constants::Tooltips::On);
+            mixxx::preferences::TooltipMode::On);
 #ifdef MIXXX_USE_QOPENGL
     ToolTipQOpenGL::singleton().setActive(
-            m_toolTipsCfg == mixxx::preferences::constants::Tooltips::On);
+            m_toolTipsMode == mixxx::preferences::TooltipMode::On);
 #endif
 
 #ifdef __ENGINEPRIME__
@@ -1054,11 +1054,11 @@ void MixxxMainWindow::slotShowKeywheel(bool toggle) {
     }
 }
 
-void MixxxMainWindow::slotTooltipModeChanged(mixxx::preferences::constants::Tooltips tt) {
-    m_toolTipsCfg = tt;
+void MixxxMainWindow::slotTooltipModeChanged(mixxx::preferences::TooltipMode tt) {
+    m_toolTipsMode = tt;
 #ifdef MIXXX_USE_QOPENGL
     ToolTipQOpenGL::singleton().setActive(
-            m_toolTipsCfg == mixxx::preferences::constants::Tooltips::On);
+            m_toolTipsMode == mixxx::preferences::TooltipMode::On);
 #endif
 }
 
@@ -1160,18 +1160,18 @@ bool MixxxMainWindow::eventFilter(QObject* obj, QEvent* event) {
                 QLatin1String(activeWindow->metaObject()->className()) !=
                         "DlgPreferences") {
             // return true for no tool tips
-            switch (m_toolTipsCfg) {
-            case mixxx::preferences::constants::Tooltips::OnlyInLibrary:
+            switch (m_toolTipsMode) {
+            case mixxx::preferences::TooltipMode::OnlyInLibrary:
                 if (dynamic_cast<WBaseWidget*>(obj) != nullptr) {
                     return true;
                 }
                 break;
-            case mixxx::preferences::constants::Tooltips::On:
+            case mixxx::preferences::TooltipMode::On:
                 break;
-            case mixxx::preferences::constants::Tooltips::Off:
+            case mixxx::preferences::TooltipMode::Off:
                 return true;
             default:
-                DEBUG_ASSERT(!"m_toolTipsCfg value unknown");
+                DEBUG_ASSERT(!"m_toolTipsMode value unknown");
                 return true;
             }
         }
