@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QtDebug>
+#include <QtGlobal>
 
 #include "util/assert.h"
 
@@ -33,16 +33,17 @@ class Singleton {
         m_instance = nullptr;
     }
 
-  protected:
-    Singleton() {}
-    virtual ~Singleton() {}
-
-  private:
-    // hide copy constructor and assign operator
     Singleton(const Singleton&) = delete;
     const Singleton& operator= (const Singleton&) = delete;
 
+  private:
+    Singleton() {
+    }
+
     static T* m_instance;
+
+    // required in order to call private constructors of the passed class.
+    friend T;
 };
 
 template<class T>
