@@ -69,23 +69,6 @@ WaveformWidgetAbstractHandle::WaveformWidgetAbstractHandle()
         : m_type(WaveformWidgetType::Invalid) {
 }
 
-///////////////////////////////////////////
-
-WaveformWidgetHolder::WaveformWidgetHolder()
-        : m_waveformWidget(nullptr),
-          m_waveformViewer(nullptr),
-          m_skinContextCache(UserSettingsPointer(), QString()) {
-}
-
-WaveformWidgetHolder::WaveformWidgetHolder(WaveformWidgetAbstract* waveformWidget,
-                                           WWaveformViewer* waveformViewer,
-                                           const QDomNode& node,
-                                           const SkinContext& parentContext)
-    : m_waveformWidget(waveformWidget),
-      m_waveformViewer(waveformViewer),
-      m_skinNodeCache(node.cloneNode()),
-      m_skinContextCache(&parentContext) {
-}
 
 ///////////////////////////////////////////
 
@@ -483,7 +466,7 @@ bool WaveformWidgetFactory::setWaveformWidget(WWaveformViewer* viewer,
     viewer->setup(node, parentContext);
 
     // create new holder
-    WaveformWidgetHolder holder(waveformWidget, viewer, node, &parentContext);
+    WaveformWidgetHolder holder{waveformWidget, viewer, node, &parentContext};
     if (index == -1) {
         // add holder
         m_waveformWidgetHolders.push_back(std::move(holder));

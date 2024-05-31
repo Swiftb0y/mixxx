@@ -83,30 +83,18 @@ class WaveformWidgetAbstractHandle {
     friend class WaveformWidgetFactory;
 };
 
-class WaveformWidgetHolder {
-  public:
-    WaveformWidgetHolder();
-    WaveformWidgetHolder(WaveformWidgetHolder&&) = default;
-    WaveformWidgetHolder& operator=(WaveformWidgetHolder&&) = default;
-  private:
-    WaveformWidgetHolder(
-            WaveformWidgetAbstract* waveformWidget,
-            WWaveformViewer* waveformViewer,
-            const QDomNode& skinNode,
-            const SkinContext& parentContext);
-
-    WaveformWidgetAbstract* m_waveformWidget;
-    WWaveformViewer* m_waveformViewer;
-    QDomNode m_skinNodeCache;
-    SkinContext m_skinContextCache;
-
-    friend class WaveformWidgetFactory;
-};
-
 //########################################
 
 class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFactory> {
     Q_OBJECT
+
+    struct WaveformWidgetHolder {
+        WaveformWidgetAbstract* m_waveformWidget = nullptr;
+        WWaveformViewer* m_waveformViewer = nullptr;
+        QDomNode m_skinNodeCache{};
+        SkinContext m_skinContextCache{UserSettingsPointer(), QString()};
+    };
+
   public:
     //TODO merge this enum with the waveform analyzer one
     enum FilterIndex { All = 0, Low = 1, Mid = 2, High = 3, FilterCount = 4};
