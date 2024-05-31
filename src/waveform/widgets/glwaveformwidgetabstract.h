@@ -16,6 +16,10 @@ class GLWaveformWidgetAbstract : public WaveformWidgetAbstract, public WGLWidget
   public:
     GLWaveformWidgetAbstract(const QString& group, QWidget* parent);
 
+    // TODO replace with C++23 deducing this
+    const WGLWidget* getGLWidget() const override {
+        return this;
+    }
     WGLWidget* getGLWidget() override {
         return this;
     }

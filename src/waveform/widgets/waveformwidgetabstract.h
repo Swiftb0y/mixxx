@@ -24,8 +24,14 @@ class WaveformWidgetAbstract : public WaveformWidgetRenderer {
     virtual WaveformWidgetType::Type getType() const = 0;
 
     bool isValid() const { return (m_widget && m_initSuccess); }
-    QWidget* getWidget() { return m_widget; }
+    QWidget* getWidget() const {
+        return m_widget;
+    }
 
+    // TODO replace with C++23 deducing this
+    virtual const WGLWidget* getGLWidget() const {
+        return nullptr;
+    }
     virtual WGLWidget* getGLWidget() {
         return nullptr;
     }

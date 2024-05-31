@@ -30,6 +30,10 @@ class allshader::WaveformWidget final : public ::WGLWidget,
     void paintGL() override;
     void initializeGL() override;
     void resizeGL(int w, int h) override;
+    // TODO replace with C++23 deducing this
+    const WGLWidget* getGLWidget() const override {
+        return this;
+    }
     WGLWidget* getGLWidget() override {
         return this;
     }
