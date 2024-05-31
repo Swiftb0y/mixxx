@@ -320,15 +320,15 @@ bool WaveformWidgetFactory::setConfig(UserSettingsPointer config) {
     if (ok) {
         setEndOfTrackWarningTime(endTime);
     } else {
-        m_config->set(ConfigKey("[Waveform]","EndOfTrackWarningTime"),
-                ConfigValue(m_endOfTrackWarningTime));
+        m_config->setValue(ConfigKey("[Waveform]", "EndOfTrackWarningTime"),
+                m_endOfTrackWarningTime);
     }
 
     double defaultZoom = m_config->getValueString(ConfigKey("[Waveform]","DefaultZoom")).toDouble(&ok);
     if (ok) {
         setDefaultZoom(defaultZoom);
     } else{
-        m_config->set(ConfigKey("[Waveform]","DefaultZoom"), ConfigValue(m_defaultZoom));
+        m_config->setValue(ConfigKey("[Waveform]", "DefaultZoom"), m_defaultZoom);
     }
 
     bool zoomSync = m_config->getValue(ConfigKey("[Waveform]", "ZoomSynchronization"), m_zoomSync);
@@ -352,8 +352,8 @@ bool WaveformWidgetFactory::setConfig(UserSettingsPointer config) {
         if (ok) {
             setVisualGain(FilterIndex(i), visualGain);
         } else {
-            m_config->set(ConfigKey("[Waveform]","VisualGain_" + QString::number(i)),
-                          QString::number(m_visualGain[i]));
+            m_config->setValue(ConfigKey("[Waveform]", "VisualGain_" + QString::number(i)),
+                    m_visualGain[i]);
         }
     }
 
@@ -361,7 +361,7 @@ bool WaveformWidgetFactory::setConfig(UserSettingsPointer config) {
     if (ok) {
         setOverviewNormalized(static_cast<bool>(overviewNormalized));
     } else {
-        m_config->set(ConfigKey("[Waveform]","OverviewNormalized"), ConfigValue(m_overviewNormalized));
+        m_config->setValue(ConfigKey("[Waveform]", "OverviewNormalized"), m_overviewNormalized);
     }
 
     m_playMarkerPosition = m_config->getValue(ConfigKey("[Waveform]", "PlayMarkerPosition"),
@@ -375,8 +375,8 @@ bool WaveformWidgetFactory::setConfig(UserSettingsPointer config) {
     if (ok) {
         setUntilMarkShowBeats(static_cast<bool>(untilMarkShowBeats));
     } else {
-        m_config->set(ConfigKey("[Waveform]", "UntilMarkShowBeats"),
-                ConfigValue(m_untilMarkShowBeats));
+        m_config->setValue(ConfigKey("[Waveform]", "UntilMarkShowBeats"),
+                m_untilMarkShowBeats);
     }
     int untilMarkShowTime =
             m_config->getValueString(
@@ -385,8 +385,8 @@ bool WaveformWidgetFactory::setConfig(UserSettingsPointer config) {
     if (ok) {
         setUntilMarkShowTime(static_cast<bool>(untilMarkShowTime));
     } else {
-        m_config->set(ConfigKey("[Waveform]", "UntilMarkShowTime"),
-                ConfigValue(m_untilMarkShowTime));
+        m_config->setValue(ConfigKey("[Waveform]", "UntilMarkShowTime"),
+                m_untilMarkShowTime);
     }
 
     setUntilMarkAlign(toUntilMarkAlign(
@@ -479,7 +479,7 @@ bool WaveformWidgetFactory::setWaveformWidget(WWaveformViewer* viewer,
 void WaveformWidgetFactory::setFrameRate(int frameRate) {
     m_frameRate = math_clamp(frameRate, 1, 120);
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]","FrameRate"), ConfigValue(m_frameRate));
+        m_config->setValue(ConfigKey("[Waveform]", "FrameRate"), m_frameRate);
     }
     if (m_pVSyncThread) {
         m_pVSyncThread->setSyncIntervalTimeMicros(static_cast<int>(1e6 / m_frameRate));
@@ -489,7 +489,8 @@ void WaveformWidgetFactory::setFrameRate(int frameRate) {
 void WaveformWidgetFactory::setEndOfTrackWarningTime(int endTime) {
     m_endOfTrackWarningTime = endTime;
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]","EndOfTrackWarningTime"), ConfigValue(m_endOfTrackWarningTime));
+        m_config->setValue(ConfigKey("[Waveform]", "EndOfTrackWarningTime"),
+                m_endOfTrackWarningTime);
     }
 }
 
@@ -603,7 +604,7 @@ void WaveformWidgetFactory::setDefaultZoom(double zoom) {
     m_defaultZoom = math_clamp(zoom, WaveformWidgetRenderer::s_waveformMinZoom,
                                WaveformWidgetRenderer::s_waveformMaxZoom);
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]","DefaultZoom"), ConfigValue(m_defaultZoom));
+        m_config->setValue(ConfigKey("[Waveform]", "DefaultZoom"), m_defaultZoom);
     }
 
     for (const auto& holder : std::as_const(m_waveformWidgetHolders)) {
@@ -614,7 +615,7 @@ void WaveformWidgetFactory::setDefaultZoom(double zoom) {
 void WaveformWidgetFactory::setZoomSync(bool sync) {
     m_zoomSync = sync;
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]","ZoomSynchronization"), ConfigValue(m_zoomSync));
+        m_config->setValue(ConfigKey("[Waveform]", "ZoomSynchronization"), m_zoomSync);
     }
 
     if (m_waveformWidgetHolders.size() == 0) {
@@ -641,7 +642,9 @@ void WaveformWidgetFactory::setDisplayBeatGridAlpha(int alpha) {
 void WaveformWidgetFactory::setVisualGain(FilterIndex index, double gain) {
     m_visualGain[index] = gain;
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]","VisualGain_" + QString::number(index)), QString::number(m_visualGain[index]));
+        m_config->setValue(
+                ConfigKey("[Waveform]", "VisualGain_" + QString::number(index)),
+                m_visualGain[index]);
     }
 }
 
@@ -652,7 +655,7 @@ double WaveformWidgetFactory::getVisualGain(FilterIndex index) const {
 void WaveformWidgetFactory::setOverviewNormalized(bool normalize) {
     m_overviewNormalized = normalize;
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]","OverviewNormalized"), ConfigValue(m_overviewNormalized));
+        m_config->setValue(ConfigKey("[Waveform]", "OverviewNormalized"), m_overviewNormalized);
     }
 }
 
@@ -1270,16 +1273,16 @@ QSurfaceFormat WaveformWidgetFactory::getSurfaceFormat(UserSettingsPointer confi
 void WaveformWidgetFactory::setUntilMarkShowBeats(bool value) {
     m_untilMarkShowBeats = value;
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]", "UntilMarkShowBeats"),
-                ConfigValue(m_untilMarkShowBeats));
+        m_config->setValue(ConfigKey("[Waveform]", "UntilMarkShowBeats"),
+                m_untilMarkShowBeats);
     }
 }
 
 void WaveformWidgetFactory::setUntilMarkShowTime(bool value) {
     m_untilMarkShowTime = value;
     if (m_config) {
-        m_config->set(ConfigKey("[Waveform]", "UntilMarkShowTime"),
-                ConfigValue(m_untilMarkShowTime));
+        m_config->setValue(ConfigKey("[Waveform]", "UntilMarkShowTime"),
+                m_untilMarkShowTime);
     }
 }
 

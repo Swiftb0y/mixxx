@@ -287,10 +287,8 @@ void DlgPrefWaveform::slotUpdate() {
 }
 
 void DlgPrefWaveform::slotApply() {
-    ConfigValue overviewtype = ConfigValue(waveformOverviewComboBox->currentIndex());
-    if (overviewtype != m_pConfig->get(ConfigKey("[Waveform]", "WaveformOverviewType"))) {
-        m_pConfig->set(ConfigKey("[Waveform]", "WaveformOverviewType"), overviewtype);
-    }
+    m_pConfig->setValue(ConfigKey("[Waveform]", "WaveformOverviewType"),
+            waveformOverviewComboBox->currentIndex());
     WaveformSettings waveformSettings(m_pConfig);
     waveformSettings.setWaveformCachingEnabled(enableWaveformCaching->isChecked());
     waveformSettings.setWaveformGenerationWithAnalysisEnabled(
@@ -509,7 +507,7 @@ void DlgPrefWaveform::updateEnableUntilMark() {
 }
 
 void DlgPrefWaveform::slotSetWaveformOverviewType(int index) {
-    m_pConfig->set(ConfigKey("[Waveform]", "WaveformOverviewType"), ConfigValue(index));
+    m_pConfig->setValue(ConfigKey("[Waveform]", "WaveformOverviewType"), index);
     emit reloadUserInterface();
 }
 
