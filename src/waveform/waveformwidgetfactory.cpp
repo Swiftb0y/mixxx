@@ -1215,13 +1215,12 @@ WaveformWidgetType::Type WaveformWidgetFactory::findTypeFromHandleIndex(int inde
 }
 
 int WaveformWidgetFactory::findHandleIndexFromType(WaveformWidgetType::Type type) {
-    for (int i = 0; i < m_waveformWidgetHandles.size(); i++) {
-        const WaveformWidgetAbstractHandle& handle = m_waveformWidgetHandles[i];
-        if (handle.m_type == type) {
-            return i;
-        }
-    }
-    return -1;
+    auto it = std::ranges::find(m_waveformWidgetHandles,
+            type,
+            &WaveformWidgetAbstractHandle::m_type);
+    return it == m_waveformWidgetHandles.cend()
+            ? -1
+            : std::ranges::distance(m_waveformWidgetHandles.cbegin(), it);
 }
 
 WaveformWidgetBackend WaveformWidgetFactory::preferredBackend() const {
