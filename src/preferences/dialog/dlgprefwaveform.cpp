@@ -7,6 +7,20 @@
 #include "util/db/dbconnectionpooled.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
 #include "waveform/waveformwidgetfactory.h"
+#include "waveform/widgets/waveformwidgettype.h"
+
+namespace {
+
+constexpr std::array kWaveformTypeComboBoxOrder = {
+        WaveformWidgetType::RGB,
+        WaveformWidgetType::Stacked,
+        WaveformWidgetType::HSV,
+        WaveformWidgetType::Filtered,
+        WaveformWidgetType::Simple,
+        WaveformWidgetType::VSyncTest,
+};
+
+} // namespace
 
 DlgPrefWaveform::DlgPrefWaveform(
         QWidget* pParent,
@@ -28,14 +42,14 @@ DlgPrefWaveform::DlgPrefWaveform(
     // We will use the type index later on to set waveform types and to
     // update the combobox.
     QVector<WaveformWidgetAbstractHandle> types = factory->getAvailableTypes();
-    for (int i = 0; i < types.size(); ++i) {
-        if (types[i].getType() == WaveformWidgetType::Empty) {
-            continue;
+
+    // technically O(n^2) but n is small and this is only done once
+    for (const WaveformWidgetType type : kWaveformTypeComboBoxOrder) {
+        const auto& handle = std::ranges::find(types, type, &WaveformWidgetAbstractHandle::getType);
+        if (handle != types.end()) {
+            waveformTypeComboBox->addItem(handle.getDisplayName(), handle.getType());
         }
-        waveformTypeComboBox->addItem(types[i].getDisplayName(), types[i].getType());
     }
-    // Sort the combobox items alphabetically
-    waveformTypeComboBox->model()->sort(0);
 
     // Populate zoom options.
     for (int i = static_cast<int>(WaveformWidgetRenderer::s_waveformMinZoom);
