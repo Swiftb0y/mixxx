@@ -6,6 +6,7 @@
 #include <qobjectdefs.h>
 
 class WaveformWidgetType {
+    Q_GADGET
   public:
     enum Type {
         // The order must not be changed because the waveforms are referenced
@@ -20,6 +21,7 @@ class WaveformWidgetType {
         Invalid,       // Don't use! Used to indicate invalid/unknown type, as
                        // Count_WaveformWidgetType used to.
     };
+    Q_ENUM(Type)
     static constexpr std::array kValues = {
             WaveformWidgetType::Empty,
             WaveformWidgetType::Simple,
