@@ -24,7 +24,6 @@ class VisualsManager;
 
 class WaveformWidgetAbstractHandle {
   public:
-    WaveformWidgetAbstractHandle();
     WaveformWidgetAbstractHandle(WaveformWidgetType::Type type,
             QList<WaveformWidgetBackend> backends
 #ifdef MIXXX_USE_QOPENGL

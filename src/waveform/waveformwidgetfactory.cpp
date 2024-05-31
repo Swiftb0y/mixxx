@@ -65,13 +65,6 @@ const QRegularExpression openGLVersionRegex(QStringLiteral("^(\\d+)\\.(\\d+).*$"
 
 ///////////////////////////////////////////
 
-WaveformWidgetAbstractHandle::WaveformWidgetAbstractHandle()
-        : m_type(WaveformWidgetType::Invalid) {
-}
-
-
-///////////////////////////////////////////
-
 WaveformWidgetFactory::WaveformWidgetFactory()
         // Set an empty waveform initially. We will set the correct one when skin load finishes.
         // Concretely, we want to set a non-GL waveform when loading the skin so that the window
