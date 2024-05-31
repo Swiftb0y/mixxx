@@ -79,7 +79,7 @@ class WWaveformViewer : public WWidget, public TrackDropTarget {
     parented_ptr<WCueMenuPopup> m_pCueMenuPopup;
     WaveformMarkPointer m_pHoveredMark;
 
-    WaveformWidgetAbstract* m_waveformWidget;
+    WaveformWidgetAbstract* m_waveformWidget; // unonwed
 
     int m_dimBrightThreshold;
 

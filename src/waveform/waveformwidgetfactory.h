@@ -12,13 +12,13 @@
 #include "util/singleton.h"
 #include "waveform/renderers/allshader/waveformrenderersignalbase.h"
 #include "waveform/vsyncthread.h"
+#include "waveform/widgets/waveformwidgetabstract.h"
 #include "waveform/widgets/waveformwidgettype.h"
 #include "waveform/widgets/waveformwidgetvars.h"
 
 class WVuMeterLegacy;
 class WVuMeterBase;
 class WWaveformViewer;
-class WaveformWidgetAbstract;
 class GuiTick;
 class VisualsManager;
 
@@ -88,8 +88,9 @@ class WaveformWidgetAbstractHandle {
 class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFactory> {
     Q_OBJECT
 
+    // TODO: make it impossible to violoate m_waveformWidget.viewer == m_waveformViewer invariant
     struct WaveformWidgetHolder {
-        WaveformWidgetAbstract* m_waveformWidget = nullptr;
+        std::unique_ptr<WaveformWidgetAbstract> m_waveformWidget = nullptr;
         WWaveformViewer* m_waveformViewer = nullptr;
         QDomNode m_skinNodeCache{};
         SkinContext m_skinContextCache{UserSettingsPointer(), QString()};
