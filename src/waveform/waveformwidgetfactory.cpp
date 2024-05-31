@@ -1,5 +1,9 @@
 #include "waveform/waveformwidgetfactory.h"
 
+#include <memory>
+
+#include "renderers/waveformwidgetrenderer.h"
+
 #ifdef MIXXX_USE_QOPENGL
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWindow>
@@ -474,7 +478,7 @@ bool WaveformWidgetFactory::setWaveformWidget(WWaveformViewer* viewer,
 
     // Cast to widget done just after creation because it can't be perform in
     // constructor (pure virtual)
-    WaveformWidgetAbstract* waveformWidget = createWaveformWidget(m_type, viewer);
+    WaveformWidgetAbstract* waveformWidget = createWaveformWidget(m_type, viewer).release();
     viewer->setWaveformWidget(waveformWidget);
     viewer->setup(node, parentContext);
 
@@ -604,7 +608,8 @@ bool WaveformWidgetFactory::setWidgetTypeFromHandle(int handleIndex, bool force)
         int previousbeatgridAlpha = previousWidget->getBeatGridAlpha();
         delete previousWidget;
         WWaveformViewer* viewer = holder.m_waveformViewer;
-        WaveformWidgetAbstract* widget = createWaveformWidget(m_type, holder.m_waveformViewer);
+        WaveformWidgetAbstract* widget =
+                createWaveformWidget(m_type, holder.m_waveformViewer).release();
         holder.m_waveformWidget = widget;
         viewer->setWaveformWidget(widget);
         viewer->setup(holder.m_skinNodeCache, holder.m_skinContextCache);
@@ -983,15 +988,18 @@ void WaveformWidgetFactory::evaluateWidgets() {
     }
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createAllshaderWaveformWidget(
+std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createAllshaderWaveformWidget(
         WaveformWidgetType::Type type, WWaveformViewer* viewer) {
     allshader::WaveformRendererSignalBase::Options options =
             m_config->getValue(ConfigKey("[Waveform]", "waveform_options"),
                     allshader::WaveformRendererSignalBase::Option::None);
-    return new allshader::WaveformWidget(viewer, type, viewer->getGroup(), options);
+    // using unique_ptr(new T) instead of make_unique because the T constructor is private
+    return std::unique_ptr<WaveformWidgetAbstract>(
+            new allshader::WaveformWidget(
+                    viewer, type, viewer->getGroup(), options));
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createFilteredWaveformWidget(
+std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createFilteredWaveformWidget(
         WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
@@ -1009,11 +1017,14 @@ WaveformWidgetAbstract* WaveformWidgetFactory::createFilteredWaveformWidget(
     }
 #endif
     default:
-        return new SoftwareWaveformWidget(viewer->getGroup(), viewer);
+        // using unique_ptr(new T) instead of make_unique because the T constructor is private
+        return std::unique_ptr<WaveformWidgetAbstract>(
+                new SoftwareWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createHSVWaveformWidget(WWaveformViewer* viewer) {
+std::unique_ptr<WaveformWidgetAbstract>
+WaveformWidgetFactory::createHSVWaveformWidget(WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
     // in case of issue when we release, we can communicate workaround on
@@ -1029,11 +1040,14 @@ WaveformWidgetAbstract* WaveformWidgetFactory::createHSVWaveformWidget(WWaveform
         return createAllshaderWaveformWidget(WaveformWidgetType::HSV, viewer);
 #endif
     default:
-        return new HSVWaveformWidget(viewer->getGroup(), viewer);
+        // using unique_ptr(new T) instead of make_unique because the T constructor is private
+        return std::unique_ptr<WaveformWidgetAbstract>(
+                new HSVWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createRGBWaveformWidget(WWaveformViewer* viewer) {
+std::unique_ptr<WaveformWidgetAbstract>
+WaveformWidgetFactory::createRGBWaveformWidget(WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
     // in case of issue when we release, we can communicate workaround on
@@ -1049,11 +1063,13 @@ WaveformWidgetAbstract* WaveformWidgetFactory::createRGBWaveformWidget(WWaveform
         return createAllshaderWaveformWidget(WaveformWidgetType::Type::RGB, viewer);
 #endif
     default:
-        return new RGBWaveformWidget(viewer->getGroup(), viewer);
+        // using unique_ptr(new T) instead of make_unique because the T constructor is private
+        return std::unique_ptr<WaveformWidgetAbstract>(
+                new RGBWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createStackedWaveformWidget(
+std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createStackedWaveformWidget(
         WWaveformViewer* viewer) {
 #ifdef MIXXX_USE_QOPENGL
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
@@ -1069,11 +1085,14 @@ WaveformWidgetAbstract* WaveformWidgetFactory::createStackedWaveformWidget(
         return createAllshaderWaveformWidget(WaveformWidgetType::Type::Stacked, viewer);
 #endif
     default:
-        return new EmptyWaveformWidget(viewer->getGroup(), viewer);
+        // using unique_ptr(new T) instead of make_unique because the T constructor is private
+        return std::unique_ptr<WaveformWidgetAbstract>(
+                new EmptyWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createSimpleWaveformWidget(WWaveformViewer* viewer) {
+std::unique_ptr<WaveformWidgetAbstract>
+WaveformWidgetFactory::createSimpleWaveformWidget(WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
     // in case of issue when we release, we can communicate workaround on
@@ -1089,61 +1108,64 @@ WaveformWidgetAbstract* WaveformWidgetFactory::createSimpleWaveformWidget(WWavef
         return createAllshaderWaveformWidget(WaveformWidgetType::Type::Simple, viewer);
 #endif
     default:
-        return new EmptyWaveformWidget(viewer->getGroup(), viewer);
+        // using unique_ptr(new T) instead of make_unique because the constructor is private
+        return std::unique_ptr<WaveformWidgetAbstract>(
+                new EmptyWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createVSyncTestWaveformWidget(
+std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createVSyncTestWaveformWidget(
         WWaveformViewer* viewer) {
+    // using unique_ptr(new T) instead of make_unique because the constructor is private
 #ifdef MIXXX_USE_QOPENGL
-    return new GLVSyncTestWidget(viewer->getGroup(), viewer);
+    return std::unique_ptr<WaveformWidgetAbstract>(
+            new GLVSyncTestWidget(viewer->getGroup(), viewer));
 #else
-    return new EmptyWaveformWidget(viewer->getGroup(), viewer);
+    return std::unique_ptr<WaveformWidgetAbstract>(
+            new EmptyWaveformWidget(viewer->getGroup(), viewer));
 #endif
 }
 
-WaveformWidgetAbstract* WaveformWidgetFactory::createWaveformWidget(
+std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createWaveformWidget(
         WaveformWidgetType::Type type, WWaveformViewer* viewer) {
-    WaveformWidgetAbstract* widget = nullptr;
-    if (viewer) {
-        if (CmdlineArgs::Instance().getSafeMode()) {
-            type = WaveformWidgetType::Empty;
-        }
-
+    std::unique_ptr<WaveformWidgetAbstract> widget = nullptr;
+    if (!viewer) {
+        return nullptr;
+    }
+    if (CmdlineArgs::Instance().getSafeMode()) {
+        type = WaveformWidgetType::Empty;
+    }
+    widget = ([&]() {
         switch (type) {
         case WaveformWidgetType::Simple:
-            widget = createSimpleWaveformWidget(viewer);
-            break;
+            return createSimpleWaveformWidget(viewer);
         case WaveformWidgetType::Filtered:
-            widget = createFilteredWaveformWidget(viewer);
-            break;
+            return createFilteredWaveformWidget(viewer);
         case WaveformWidgetType::HSV:
-            widget = createHSVWaveformWidget(viewer);
-            break;
+            return createHSVWaveformWidget(viewer);
         case WaveformWidgetType::VSyncTest:
-            widget = createVSyncTestWaveformWidget(viewer);
-            break;
+            return createVSyncTestWaveformWidget(viewer);
         case WaveformWidgetType::RGB:
-            widget = createRGBWaveformWidget(viewer);
-            break;
+            return createRGBWaveformWidget(viewer);
         case WaveformWidgetType::Stacked:
-            widget = createStackedWaveformWidget(viewer);
-            break;
+            return createStackedWaveformWidget(viewer);
         default:
-            widget = new EmptyWaveformWidget(viewer->getGroup(), viewer);
-            break;
+            qWarning() << "Unknown WaveformWidgetType" << type;
+            // using unique_ptr(new T) instead of make_unique because the constructor is private
+            return std::unique_ptr<WaveformWidgetAbstract>(
+                    new EmptyWaveformWidget(viewer->getGroup(), viewer));
         }
+    }());
+    widget->castToQWidget();
+    if (!widget->isValid()) {
+        qWarning() << "failed to init WaveformWidget" << type << "fall back to \"Empty\"";
+        // using unique_ptr(new T) instead of make_unique because the constructor is private
+        widget = std::unique_ptr<WaveformWidgetAbstract>(
+                new EmptyWaveformWidget(viewer->getGroup(), viewer));
         widget->castToQWidget();
         if (!widget->isValid()) {
-            qWarning() << "failed to init WaveformWidget" << type << "fall back to \"Empty\"";
-            delete widget;
-            widget = new EmptyWaveformWidget(viewer->getGroup(), viewer);
-            widget->castToQWidget();
-            if (!widget->isValid()) {
-                qWarning() << "failed to init EmptyWaveformWidget";
-                delete widget;
-                widget = nullptr;
-            }
+            qWarning() << "failed to init EmptyWaveformWidget";
+            return nullptr;
         }
     }
     return widget;

@@ -245,9 +245,10 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
     void evaluateWidgets();
     template<typename WaveformT>
     QString buildWidgetDisplayName() const;
-    WaveformWidgetAbstract* createAllshaderWaveformWidget(
+    std::unique_ptr<WaveformWidgetAbstract> createAllshaderWaveformWidget(
             WaveformWidgetType::Type type, WWaveformViewer* viewer);
-    WaveformWidgetAbstract* createWaveformWidget(WaveformWidgetType::Type type, WWaveformViewer* viewer);
+    std::unique_ptr<WaveformWidgetAbstract> createWaveformWidget(
+            WaveformWidgetType::Type type, WWaveformViewer* viewer);
     int findIndexOf(WWaveformViewer* viewer) const;
 
     WaveformWidgetType::Type findTypeFromHandleIndex(int index);
@@ -287,13 +288,12 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
     GuiTick* m_pGuiTick;  // not owned
     VisualsManager* m_pVisualsManager;  // not owned
 
-    // TODO(#13245): Migrate the following methods to smart pointer.
-    WaveformWidgetAbstract* createFilteredWaveformWidget(WWaveformViewer* viewer);
-    WaveformWidgetAbstract* createHSVWaveformWidget(WWaveformViewer* viewer);
-    WaveformWidgetAbstract* createRGBWaveformWidget(WWaveformViewer* viewer);
-    WaveformWidgetAbstract* createStackedWaveformWidget(WWaveformViewer* viewer);
-    WaveformWidgetAbstract* createSimpleWaveformWidget(WWaveformViewer* viewer);
-    WaveformWidgetAbstract* createVSyncTestWaveformWidget(WWaveformViewer* viewer);
+    std::unique_ptr<WaveformWidgetAbstract> createFilteredWaveformWidget(WWaveformViewer* viewer);
+    std::unique_ptr<WaveformWidgetAbstract> createHSVWaveformWidget(WWaveformViewer* viewer);
+    std::unique_ptr<WaveformWidgetAbstract> createRGBWaveformWidget(WWaveformViewer* viewer);
+    std::unique_ptr<WaveformWidgetAbstract> createStackedWaveformWidget(WWaveformViewer* viewer);
+    std::unique_ptr<WaveformWidgetAbstract> createSimpleWaveformWidget(WWaveformViewer* viewer);
+    std::unique_ptr<WaveformWidgetAbstract> createVSyncTestWaveformWidget(WWaveformViewer* viewer);
 
     //Debug
     PerformanceTimer m_time;
