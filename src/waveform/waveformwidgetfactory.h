@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QSurfaceFormat>
 #include <QVector>
+#include <memory>
 #include <vector>
 
 #include "preferences/usersettings.h"
@@ -10,6 +11,7 @@
 #include "util/performancetimer.h"
 #include "util/singleton.h"
 #include "waveform/renderers/allshader/waveformrenderersignalbase.h"
+#include "waveform/vsyncthread.h"
 #include "waveform/widgets/waveformwidgettype.h"
 #include "waveform/widgets/waveformwidgetvars.h"
 
@@ -17,7 +19,6 @@ class WVuMeterLegacy;
 class WVuMeterBase;
 class WWaveformViewer;
 class WaveformWidgetAbstract;
-class VSyncThread;
 class GuiTick;
 class VisualsManager;
 
@@ -223,7 +224,6 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
 
   protected:
     WaveformWidgetFactory();
-    virtual ~WaveformWidgetFactory();
 
     friend class Singleton<WaveformWidgetFactory>;
 
@@ -283,7 +283,7 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
     bool m_openGLShaderAvailable;
     int m_beatGridAlpha;
 
-    VSyncThread* m_vsyncThread;
+    std::unique_ptr<VSyncThread> m_pVSyncThread;
     GuiTick* m_pGuiTick;  // not owned
     VisualsManager* m_pVisualsManager;  // not owned
 
