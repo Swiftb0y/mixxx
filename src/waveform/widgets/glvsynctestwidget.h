@@ -1,6 +1,7 @@
 #pragma once
 
 #include "waveform/widgets/glwaveformwidgetabstract.h"
+#include "waveform/widgets/waveformwidgetcategory.h"
 
 class GLVSyncTestWidget : public GLWaveformWidgetAbstract {
     Q_OBJECT

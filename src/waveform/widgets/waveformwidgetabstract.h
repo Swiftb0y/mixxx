@@ -4,7 +4,6 @@
 
 #include "util/duration.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
-#include "waveform/widgets/waveformwidgetcategory.h"
 #include "waveformwidgettype.h"
 
 class VSyncThread;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "waveform/widgets/nonglwaveformwidgetabstract.h"
+#include "waveform/widgets/waveformwidgetcategory.h"
 
 class QWidget;
 
