@@ -1177,14 +1177,6 @@ void WaveformWidgetFactory::getAvailableVSyncTypes(QList<QPair<int, QString>>* p
     m_pVSyncThread->getAvailableVSyncTypes(pList);
 }
 
-WaveformWidgetType::Type WaveformWidgetFactory::findTypeFromHandleIndex(int index) {
-    WaveformWidgetType::Type type = WaveformWidgetType::Invalid;
-    if (index >= 0 && index < m_waveformWidgetHandles.size()) {
-        type = m_waveformWidgetHandles[index].m_type;
-    }
-    return type;
-}
-
 int WaveformWidgetFactory::findHandleIndexFromType(WaveformWidgetType::Type type) {
     auto it = std::ranges::find(m_waveformWidgetHandles,
             type,

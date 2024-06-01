@@ -239,8 +239,6 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
             WaveformWidgetType::Type type, WWaveformViewer* viewer);
     int findIndexOf(WWaveformViewer* viewer) const;
 
-    WaveformWidgetType::Type findTypeFromHandleIndex(int index);
-
     //All type of available widgets
 
     QVector<WaveformWidgetAbstractHandle> m_waveformWidgetHandles;
