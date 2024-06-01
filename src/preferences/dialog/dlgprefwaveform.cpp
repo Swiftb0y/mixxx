@@ -44,10 +44,10 @@ DlgPrefWaveform::DlgPrefWaveform(
     QVector<WaveformWidgetAbstractHandle> types = factory->getAvailableTypes();
 
     // technically O(n^2) but n is small and this is only done once
-    for (const WaveformWidgetType type : kWaveformTypeComboBoxOrder) {
+    for (const WaveformWidgetType::Type type : kWaveformTypeComboBoxOrder) {
         const auto& handle = std::ranges::find(types, type, &WaveformWidgetAbstractHandle::getType);
         if (handle != types.end()) {
-            waveformTypeComboBox->addItem(handle.getDisplayName(), handle.getType());
+            waveformTypeComboBox->addItem(handle->getDisplayName(), handle->getType());
         }
     }
 
