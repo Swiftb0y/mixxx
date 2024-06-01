@@ -1242,6 +1242,7 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/waveform/widgets/rgbwaveformwidget.cpp
   src/waveform/widgets/softwarewaveformwidget.cpp
   src/waveform/widgets/waveformwidgetabstract.cpp
+  src/waveform/widgets/waveformwidgettype.cpp
   src/waveform/widgets/glwaveformwidgetabstract.cpp
   src/waveform/widgets/glvsynctestwidget.cpp
   src/widget/controlwidgetconnection.cpp
