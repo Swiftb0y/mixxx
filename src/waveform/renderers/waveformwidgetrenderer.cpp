@@ -2,6 +2,8 @@
 
 #include <QPainter>
 #include <QPainterPath>
+#include <algorithm>
+#include <ranges>
 
 #include "control/controlproxy.h"
 #include "track/track.h"
@@ -71,11 +73,6 @@ WaveformWidgetRenderer::WaveformWidgetRenderer(const QString& group)
 
 WaveformWidgetRenderer::~WaveformWidgetRenderer() {
     //qDebug() << "~WaveformWidgetRenderer";
-
-    for (int i = 0; i < m_rendererStack.size(); ++i) {
-        delete m_rendererStack[i];
-    }
-
     delete m_pRateRatioCO;
     delete m_pGainControlObject;
     delete m_pTrackSamplesControlObject;
@@ -97,12 +94,9 @@ bool WaveformWidgetRenderer::init() {
     m_pTrackSamplesControlObject = new ControlProxy(
             m_group, "track_samples");
 
-    for (int i = 0; i < m_rendererStack.size(); ++i) {
-        if (!m_rendererStack[i]->init()) {
-            return false;
-        }
-    }
-    return true;
+    return std::ranges::all_of(std::as_const(m_rendererStack), [](const auto& pRenderer) {
+        return pRenderer->init();
+    });
 }
 
 void WaveformWidgetRenderer::onPreRender(VSyncThread* vsyncThread) {
@@ -205,19 +199,18 @@ void WaveformWidgetRenderer::draw(QPainter* painter, QPaintEvent* event) {
 
     // not ready to display need to wait until track initialization is done
     // draw only first in stack (background)
-    int stackSize = m_rendererStack.size();
     if (shouldOnlyDrawBackground()) {
-        if (stackSize) {
-            m_rendererStack.at(0)->draw(painter, event);
+        if (!m_rendererStack.empty()) {
+            m_rendererStack.front()->draw(painter, event);
         }
         if (m_passthroughEnabled) {
             drawPassthroughLabel(painter);
         }
         return;
     } else {
-        for (int i = 0; i < stackSize; i++) {
+        for (auto& pRenderer : m_rendererStack) {
             //qDebug() << i << " a  " << timer.restart().formatNanosWithUnit();
-            m_rendererStack.at(i)->draw(painter, event);
+            pRenderer->draw(painter, event);
             //qDebug() << i << " e " << timer.restart().formatNanosWithUnit();
         }
 
@@ -368,8 +361,8 @@ void WaveformWidgetRenderer::setPassThroughEnabled(bool enabled) {
     // the renderer state dirty in order trigger the render process. This is only
     // required for the background renderer since that's the only one that'll
     // be processed if passtrhough is active.
-    if (!m_rendererStack.isEmpty()) {
-        m_rendererStack[0]->setDirty(true);
+    if (!m_rendererStack.empty()) {
+        m_rendererStack.front()->setDirty(true);
     }
 }
 
@@ -377,9 +370,9 @@ void WaveformWidgetRenderer::resizeRenderer(int width, int height, float deviceP
     m_width = width;
     m_height = height;
     m_devicePixelRatio = devicePixelRatio;
-    for (int i = 0; i < m_rendererStack.size(); ++i) {
-        m_rendererStack[i]->setDirty(true);
-        m_rendererStack[i]->onResize();
+    for (auto& pRenderer : m_rendererStack) {
+        pRenderer->setDirty(true);
+        pRenderer->onResize();
     }
 }
 
@@ -400,9 +393,9 @@ void WaveformWidgetRenderer::setup(
     }
 
     m_colors.setup(node, context);
-    for (int i = 0; i < m_rendererStack.size(); ++i) {
-        m_rendererStack[i]->setScaleFactor(m_scaleFactor);
-        m_rendererStack[i]->setup(node, context);
+    for (auto& pRenderer : m_rendererStack) {
+        pRenderer->setScaleFactor(m_scaleFactor);
+        pRenderer->setup(node, context);
     }
     m_passthroughLabelColor = m_colors.getPassthroughLabelColor();
 }
@@ -421,8 +414,8 @@ void WaveformWidgetRenderer::setTrack(TrackPointer track) {
     //used to postpone first display until track sample is actually available
     m_trackSamples = -1;
 
-    for (int i = 0; i < m_rendererStack.size(); ++i) {
-        m_rendererStack[i]->onSetTrack();
+    for (auto& pRenderer : m_rendererStack) {
+        pRenderer->onSetTrack();
     }
 }
 

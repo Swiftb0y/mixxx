@@ -54,9 +54,6 @@ WaveformWidget::WaveformWidget(QWidget* parent,
 
 WaveformWidget::~WaveformWidget() {
     makeCurrentIfNeeded();
-    for (auto* pRenderer : std::as_const(m_rendererStack)) {
-        delete pRenderer;
-    }
     m_rendererStack.clear();
     doneCurrent();
 }
@@ -106,10 +103,10 @@ mixxx::Duration WaveformWidget::render() {
 void WaveformWidget::paintGL() {
     if (shouldOnlyDrawBackground()) {
         if (!m_rendererStack.empty()) {
-            m_rendererStack[0]->allshaderWaveformRenderer()->paintGL();
+            m_rendererStack.front()->allshaderWaveformRenderer()->paintGL();
         }
     } else {
-        for (auto* pRenderer : std::as_const(m_rendererStack)) {
+        for (const auto& pRenderer : std::as_const(m_rendererStack)) {
             pRenderer->allshaderWaveformRenderer()->paintGL();
         }
     }
@@ -120,13 +117,13 @@ void WaveformWidget::castToQWidget() {
 }
 
 void WaveformWidget::initializeGL() {
-    for (auto* pRenderer : std::as_const(m_rendererStack)) {
+    for (const auto& pRenderer : std::as_const(m_rendererStack)) {
         pRenderer->allshaderWaveformRenderer()->initializeGL();
     }
 }
 
 void WaveformWidget::resizeGL(int w, int h) {
-    for (auto* pRenderer : std::as_const(m_rendererStack)) {
+    for (const auto& pRenderer : std::as_const(m_rendererStack)) {
         pRenderer->allshaderWaveformRenderer()->resizeGL(w, h);
     }
 }

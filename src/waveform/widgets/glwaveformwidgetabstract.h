@@ -35,8 +35,8 @@ class GLWaveformWidgetAbstract : public WaveformWidgetAbstract, public WGLWidget
     }
 #endif
     void initializeGL() override {
-        for (auto renderer : std::as_const(m_rendererStack)) {
-            auto glRenderer = dynamic_cast<GLWaveformRenderer*>(renderer);
+        for (auto& pRenderer : m_rendererStack) {
+            auto* glRenderer = dynamic_cast<GLWaveformRenderer*>(pRenderer.get());
             if (glRenderer) {
                 glRenderer->initializeGL();
             }

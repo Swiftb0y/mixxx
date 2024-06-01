@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "track/track_decl.h"
 #include "util/class.h"
 #include "waveform/renderers/waveformmark.h"
@@ -163,11 +165,13 @@ class WaveformWidgetRenderer {
         return m_dimBrightThreshold;
     }
 
+    // return value is non-owning!
     template<class T_Renderer, typename... Args>
     inline T_Renderer* addRenderer(Args&&... args) {
-        T_Renderer* renderer = new T_Renderer(this, std::forward<Args>(args)...);
-        m_rendererStack.push_back(renderer);
-        return renderer;
+        auto renderer = std::make_unique<T_Renderer>(this, std::forward<Args>(args)...);
+        auto* rendererPtr = renderer.get();
+        m_rendererStack.push_back(std::move(renderer));
+        return rendererPtr;
     }
 
     void setTrack(TrackPointer track);
@@ -195,7 +199,7 @@ class WaveformWidgetRenderer {
   protected:
     const QString m_group;
     TrackPointer m_pTrack;
-    QList<WaveformRendererAbstract*> m_rendererStack;
+    std::vector<std::unique_ptr<WaveformRendererAbstract>> m_rendererStack;
     Qt::Orientation m_orientation;
     int m_dimBrightThreshold;
     int m_height;
