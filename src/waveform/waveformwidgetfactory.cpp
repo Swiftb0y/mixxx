@@ -4,6 +4,7 @@
 
 #include "renderers/waveformwidgetrenderer.h"
 #include "util/assert.h"
+#include "waveform/widgets/waveformwidgettype.h"
 
 #ifdef MIXXX_USE_QOPENGL
 #include <QOpenGLShaderProgram>
@@ -1106,6 +1107,8 @@ std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createWaveformWid
             return createStackedWaveformWidget(viewer);
         default:
             qWarning() << "Unknown WaveformWidgetType" << type;
+            [[fallthrough]];
+        case WaveformWidgetType::Empty:
             // using unique_ptr(new T) instead of make_unique because the constructor is private
             return std::unique_ptr<WaveformWidgetAbstract>(
                     new EmptyWaveformWidget(viewer->getGroup(), viewer));
