@@ -7,7 +7,6 @@
 #include <memory>
 
 #include "util/assert.h"
-#include "util/parented_ptr.h"
 
 // Use this wrapper class to clearly represent a raw pointer that is owned by the QT object tree.
 // Objects which both derive from QObject AND have a parent object, have their lifetime governed by
@@ -19,26 +18,31 @@
 template<typename T>
 class parented_ptr final {
   public:
-    parented_ptr() noexcept
+    constexpr parented_ptr() noexcept
             : m_ptr{nullptr} {
     }
 
-    parented_ptr(std::nullptr_t) noexcept
+    constexpr parented_ptr(std::nullptr_t) noexcept
             : m_ptr{nullptr} {
     }
 
-    explicit parented_ptr(T* t) noexcept
+    constexpr explicit parented_ptr(T* t) noexcept
             : m_ptr{t} {
     }
 // Only generate destructor if not empty, otherwise its empty but will
 // cause the parented_ptr to be not trivially destructible even though it could be.
 #ifdef MIXXX_DEBUG_ASSERTIONS_ENABLED
     ~parented_ptr() noexcept {
-        DEBUG_ASSERT(!m_ptr || static_cast<const QObject*>(m_ptr)->parent());
+        // T might only be an unrelated base class of some derived type that
+        // derives from QObject further down the inheritance hierarchy,
+        // so a static_cast doesn't suffice and we need a dynamic_cast.
+        const auto* obj = dynamic_cast<const QObject*>(m_ptr);
+        DEBUG_ASSERT(obj != nullptr);
+        DEBUG_ASSERT(m_ptr == nullptr || obj->parent() != nullptr);
     }
 #else
     // explicitly generate trivial destructor (since decltype(m_ptr) is not a class type)
-    ~parented_ptr() noexcept = default;
+    constexpr ~parented_ptr() noexcept = default;
 #endif
     // Rule of 5
     parented_ptr(const parented_ptr<T>&) = delete;
@@ -50,7 +54,7 @@ class parented_ptr final {
     template<
             typename U,
             typename = typename std::enable_if<std::is_convertible<U*, T*>::value, U>::type>
-    parented_ptr(parented_ptr<U>&& u) noexcept
+    constexpr parented_ptr(parented_ptr<U>&& u) noexcept
             : m_ptr{u.m_ptr} {
         u.m_ptr = nullptr;
     }
@@ -59,13 +63,13 @@ class parented_ptr final {
     template<
             typename U,
             typename = typename std::enable_if<std::is_convertible<U*, T*>::value, U>::type>
-    parented_ptr& operator=(parented_ptr<U>&& u) noexcept {
+    constexpr parented_ptr& operator=(parented_ptr<U>&& u) noexcept {
         parented_ptr temp{std::move(u)};
         std::swap(temp.m_ptr, m_ptr);
         return *this;
     }
 
-    parented_ptr& operator=(std::nullptr_t) noexcept {
+    constexpr parented_ptr& operator=(std::nullptr_t) noexcept {
         parented_ptr{std::move(*this)}; // move *this into a temporary that gets destructed
         return *this;
     }
@@ -73,27 +77,27 @@ class parented_ptr final {
     // Prevent unintended invocation of delete on parented_ptr
     operator void*() const = delete;
 
-    operator T*() const noexcept {
+    constexpr operator T*() const noexcept {
         return m_ptr;
     }
 
-    T* get() const noexcept {
+    constexpr T* get() const noexcept {
         return m_ptr;
     }
 
-    T& operator*() const noexcept {
+    constexpr T& operator*() const noexcept {
         return *m_ptr;
     }
 
-    T* operator->() const noexcept {
+    constexpr T* operator->() const noexcept {
         return m_ptr;
     }
 
-    operator bool() const noexcept {
+    constexpr operator bool() const noexcept {
         return m_ptr != nullptr;
     }
 
-    QPointer<T> toWeakRef() {
+    constexpr QPointer<T> toWeakRef() {
         return m_ptr;
     }
 
@@ -105,7 +109,7 @@ class parented_ptr final {
 };
 
 template<typename T, typename... Args>
-inline parented_ptr<T> make_parented(Args&&... args) {
+constexpr parented_ptr<T> make_parented(Args&&... args) {
     return parented_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
@@ -118,7 +122,7 @@ inline parented_ptr<T> make_parented(Args&&... args) {
 // automatically be destructed such that the DEBUG_ASSERT that checks whether a parent exists is
 // triggered.
 template<typename T>
-inline parented_ptr<T> to_parented(std::unique_ptr<T>& u) noexcept {
+constexpr parented_ptr<T> to_parented(std::unique_ptr<T>& u) noexcept {
     // the DEBUG_ASSERT in the parented_ptr constructor will catch cases where the unique_ptr should
     // not have been released
     return parented_ptr<T>{u.release()};
@@ -127,31 +131,31 @@ inline parented_ptr<T> to_parented(std::unique_ptr<T>& u) noexcept {
 // Comparison operator definitions:
 
 template<typename T, typename U>
-inline bool operator==(const T* lhs, const parented_ptr<U>& rhs) noexcept {
+constexpr bool operator==(const T* lhs, const parented_ptr<U>& rhs) noexcept {
     return lhs == rhs.get();
 }
 
 template<typename T, typename U>
-inline bool operator==(const parented_ptr<T>& lhs, const U* rhs) noexcept {
+constexpr bool operator==(const parented_ptr<T>& lhs, const U* rhs) noexcept {
     return lhs.get() == rhs;
 }
 
 template<typename T, typename U>
-inline bool operator==(const parented_ptr<T>& lhs, const parented_ptr<U>& rhs) noexcept {
+constexpr bool operator==(const parented_ptr<T>& lhs, const parented_ptr<U>& rhs) noexcept {
     return lhs.get() == rhs.get();
 }
 
 template<typename T, typename U>
-inline bool operator!=(const T* lhs, const parented_ptr<U>& rhs) noexcept {
+constexpr bool operator!=(const T* lhs, const parented_ptr<U>& rhs) noexcept {
     return !(lhs == rhs.get());
 }
 
 template<typename T, typename U>
-inline bool operator!=(const parented_ptr<T>& lhs, const U* rhs) noexcept {
+constexpr bool operator!=(const parented_ptr<T>& lhs, const U* rhs) noexcept {
     return !(lhs.get() == rhs);
 }
 
 template<typename T, typename U>
-inline bool operator!=(const parented_ptr<T>& lhs, const parented_ptr<U>& rhs) noexcept {
+constexpr bool operator!=(const parented_ptr<T>& lhs, const parented_ptr<U>& rhs) noexcept {
     return !(lhs.get() == rhs.get());
 }
