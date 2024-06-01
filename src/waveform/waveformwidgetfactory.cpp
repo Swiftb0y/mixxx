@@ -4,6 +4,7 @@
 
 #include "renderers/waveformwidgetrenderer.h"
 #include "util/assert.h"
+#include "util/parented_ptr.h"
 #include "waveform/widgets/waveformwidgettype.h"
 
 #ifdef MIXXX_USE_QOPENGL
@@ -449,7 +450,7 @@ bool WaveformWidgetFactory::setWaveformWidget(WWaveformViewer* viewer,
 
     // Cast to widget done just after creation because it can't be perform in
     // constructor (pure virtual)
-    std::unique_ptr<WaveformWidgetAbstract> waveformWidget = createWaveformWidget(m_type, viewer);
+    parented_ptr<WaveformWidgetAbstract> waveformWidget = createWaveformWidget(m_type, viewer);
     viewer->setWaveformWidget(waveformWidget.get());
     viewer->setup(node, parentContext);
 
@@ -944,18 +945,18 @@ void WaveformWidgetFactory::evaluateWidgets() {
     }
 }
 
-std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createAllshaderWaveformWidget(
+parented_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createAllshaderWaveformWidget(
         WaveformWidgetType::Type type, WWaveformViewer* viewer) {
     allshader::WaveformRendererSignalBase::Options options =
             m_config->getValue(ConfigKey("[Waveform]", "waveform_options"),
                     allshader::WaveformRendererSignalBase::Option::None);
-    // using unique_ptr(new T) instead of make_unique because the T constructor is private
-    return std::unique_ptr<WaveformWidgetAbstract>(
+    // using parented_ptr(new T) instead of make_unique because the T constructor is private
+    return parented_ptr<WaveformWidgetAbstract>(
             new allshader::WaveformWidget(
                     viewer, type, viewer->getGroup(), options));
 }
 
-std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createFilteredWaveformWidget(
+parented_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createFilteredWaveformWidget(
         WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
@@ -973,13 +974,13 @@ std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createFilteredWav
     }
 #endif
     default:
-        // using unique_ptr(new T) instead of make_unique because the T constructor is private
-        return std::unique_ptr<WaveformWidgetAbstract>(
+        // using parented_ptr(new T) instead of make_unique because the T constructor is private
+        return parented_ptr<WaveformWidgetAbstract>(
                 new SoftwareWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-std::unique_ptr<WaveformWidgetAbstract>
+parented_ptr<WaveformWidgetAbstract>
 WaveformWidgetFactory::createHSVWaveformWidget(WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
@@ -996,13 +997,13 @@ WaveformWidgetFactory::createHSVWaveformWidget(WWaveformViewer* viewer) {
         return createAllshaderWaveformWidget(WaveformWidgetType::HSV, viewer);
 #endif
     default:
-        // using unique_ptr(new T) instead of make_unique because the T constructor is private
-        return std::unique_ptr<WaveformWidgetAbstract>(
+        // using parented_ptr(new T) instead of make_unique because the T constructor is private
+        return parented_ptr<WaveformWidgetAbstract>(
                 new HSVWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-std::unique_ptr<WaveformWidgetAbstract>
+parented_ptr<WaveformWidgetAbstract>
 WaveformWidgetFactory::createRGBWaveformWidget(WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
@@ -1019,13 +1020,13 @@ WaveformWidgetFactory::createRGBWaveformWidget(WWaveformViewer* viewer) {
         return createAllshaderWaveformWidget(WaveformWidgetType::Type::RGB, viewer);
 #endif
     default:
-        // using unique_ptr(new T) instead of make_unique because the T constructor is private
-        return std::unique_ptr<WaveformWidgetAbstract>(
+        // using parented_ptr(new T) instead of make_unique because the T constructor is private
+        return parented_ptr<WaveformWidgetAbstract>(
                 new RGBWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createStackedWaveformWidget(
+parented_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createStackedWaveformWidget(
         WWaveformViewer* viewer) {
 #ifdef MIXXX_USE_QOPENGL
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
@@ -1041,13 +1042,13 @@ std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createStackedWave
         return createAllshaderWaveformWidget(WaveformWidgetType::Type::Stacked, viewer);
 #endif
     default:
-        // using unique_ptr(new T) instead of make_unique because the T constructor is private
-        return std::unique_ptr<WaveformWidgetAbstract>(
+        // using parented_ptr(new T) instead of make_unique because the T constructor is private
+        return parented_ptr<WaveformWidgetAbstract>(
                 new EmptyWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-std::unique_ptr<WaveformWidgetAbstract>
+parented_ptr<WaveformWidgetAbstract>
 WaveformWidgetFactory::createSimpleWaveformWidget(WWaveformViewer* viewer) {
     // On the UI, hardware acceleration is a boolean (0 => software rendering, 1
     // => hardware acceleration), but in the setting, we keep the granularity so
@@ -1064,27 +1065,27 @@ WaveformWidgetFactory::createSimpleWaveformWidget(WWaveformViewer* viewer) {
         return createAllshaderWaveformWidget(WaveformWidgetType::Type::Simple, viewer);
 #endif
     default:
-        // using unique_ptr(new T) instead of make_unique because the constructor is private
-        return std::unique_ptr<WaveformWidgetAbstract>(
+        // using parented_ptr(new T) instead of make_unique because the constructor is private
+        return parented_ptr<WaveformWidgetAbstract>(
                 new EmptyWaveformWidget(viewer->getGroup(), viewer));
     }
 }
 
-std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createVSyncTestWaveformWidget(
+parented_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createVSyncTestWaveformWidget(
         WWaveformViewer* viewer) {
-    // using unique_ptr(new T) instead of make_unique because the constructor is private
+    // using parented_ptr(new T) instead of make_unique because the constructor is private
 #ifdef MIXXX_USE_QOPENGL
-    return std::unique_ptr<WaveformWidgetAbstract>(
+    return parented_ptr<WaveformWidgetAbstract>(
             new GLVSyncTestWidget(viewer->getGroup(), viewer));
 #else
-    return std::unique_ptr<WaveformWidgetAbstract>(
+    return parented_ptr<WaveformWidgetAbstract>(
             new EmptyWaveformWidget(viewer->getGroup(), viewer));
 #endif
 }
 
-std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createWaveformWidget(
+parented_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createWaveformWidget(
         WaveformWidgetType::Type type, WWaveformViewer* viewer) {
-    std::unique_ptr<WaveformWidgetAbstract> widget = nullptr;
+    parented_ptr<WaveformWidgetAbstract> widget = nullptr;
     if (!viewer) {
         return nullptr;
     }
@@ -1109,16 +1110,16 @@ std::unique_ptr<WaveformWidgetAbstract> WaveformWidgetFactory::createWaveformWid
             qWarning() << "Unknown WaveformWidgetType" << type;
             [[fallthrough]];
         case WaveformWidgetType::Empty:
-            // using unique_ptr(new T) instead of make_unique because the constructor is private
-            return std::unique_ptr<WaveformWidgetAbstract>(
+            // using parented_ptr(new T) instead of make_unique because the constructor is private
+            return parented_ptr<WaveformWidgetAbstract>(
                     new EmptyWaveformWidget(viewer->getGroup(), viewer));
         }
     }());
     widget->castToQWidget();
     if (!widget->isValid()) {
         qWarning() << "failed to init WaveformWidget" << type << "fall back to \"Empty\"";
-        // using unique_ptr(new T) instead of make_unique because the constructor is private
-        widget = std::unique_ptr<WaveformWidgetAbstract>(
+        // using parented_ptr(new T) instead of make_unique because the constructor is private
+        widget = parented_ptr<WaveformWidgetAbstract>(
                 new EmptyWaveformWidget(viewer->getGroup(), viewer));
         widget->castToQWidget();
         if (!widget->isValid()) {

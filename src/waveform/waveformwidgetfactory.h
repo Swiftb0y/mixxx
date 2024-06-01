@@ -8,6 +8,7 @@
 
 #include "preferences/usersettings.h"
 #include "skin/legacy/skincontext.h"
+#include "util/parented_ptr.h"
 #include "util/performancetimer.h"
 #include "util/singleton.h"
 #include "waveform/renderers/allshader/waveformrenderersignalbase.h"
@@ -89,7 +90,7 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
 
     // TODO: make it impossible to violoate m_waveformWidget.viewer == m_waveformViewer invariant
     struct WaveformWidgetHolder {
-        std::unique_ptr<WaveformWidgetAbstract> m_waveformWidget = nullptr;
+        parented_ptr<WaveformWidgetAbstract> m_waveformWidget = nullptr;
         WWaveformViewer* m_waveformViewer = nullptr;
         QDomNode m_skinNodeCache{};
         SkinContext m_skinContextCache{UserSettingsPointer(), QString()};
@@ -233,9 +234,9 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
     void evaluateWidgets();
     template<typename WaveformT>
     QString buildWidgetDisplayName() const;
-    std::unique_ptr<WaveformWidgetAbstract> createAllshaderWaveformWidget(
+    parented_ptr<WaveformWidgetAbstract> createAllshaderWaveformWidget(
             WaveformWidgetType::Type type, WWaveformViewer* viewer);
-    std::unique_ptr<WaveformWidgetAbstract> createWaveformWidget(
+    parented_ptr<WaveformWidgetAbstract> createWaveformWidget(
             WaveformWidgetType::Type type, WWaveformViewer* viewer);
     int findIndexOf(WWaveformViewer* viewer) const;
 
@@ -274,12 +275,12 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
     GuiTick* m_pGuiTick;  // not owned
     VisualsManager* m_pVisualsManager;  // not owned
 
-    std::unique_ptr<WaveformWidgetAbstract> createFilteredWaveformWidget(WWaveformViewer* viewer);
-    std::unique_ptr<WaveformWidgetAbstract> createHSVWaveformWidget(WWaveformViewer* viewer);
-    std::unique_ptr<WaveformWidgetAbstract> createRGBWaveformWidget(WWaveformViewer* viewer);
-    std::unique_ptr<WaveformWidgetAbstract> createStackedWaveformWidget(WWaveformViewer* viewer);
-    std::unique_ptr<WaveformWidgetAbstract> createSimpleWaveformWidget(WWaveformViewer* viewer);
-    std::unique_ptr<WaveformWidgetAbstract> createVSyncTestWaveformWidget(WWaveformViewer* viewer);
+    parented_ptr<WaveformWidgetAbstract> createFilteredWaveformWidget(WWaveformViewer* viewer);
+    parented_ptr<WaveformWidgetAbstract> createHSVWaveformWidget(WWaveformViewer* viewer);
+    parented_ptr<WaveformWidgetAbstract> createRGBWaveformWidget(WWaveformViewer* viewer);
+    parented_ptr<WaveformWidgetAbstract> createStackedWaveformWidget(WWaveformViewer* viewer);
+    parented_ptr<WaveformWidgetAbstract> createSimpleWaveformWidget(WWaveformViewer* viewer);
+    parented_ptr<WaveformWidgetAbstract> createVSyncTestWaveformWidget(WWaveformViewer* viewer);
 
     //Debug
     PerformanceTimer m_time;
