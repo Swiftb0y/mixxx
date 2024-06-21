@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QElapsedTimer>
+#include <memory>
 
 #include "controllers/controllermappinginfo.h"
+#include "mixer/playermanager.h"
 #include "util/duration.h"
 #include "util/runtimeloggingcategory.h"
 
@@ -15,7 +17,7 @@ class ControllerScriptEngineLegacy;
 class Controller : public QObject {
     Q_OBJECT
   public:
-    explicit Controller(const QString& deviceName);
+    explicit Controller(const QString& deviceName, std::shared_ptr<PlayerManager> pPlayerManager);
     ~Controller() override;  // Subclass should call close() at minimum.
 
     /// The object that is exposed to the JS scripts as the "controller" object.
@@ -135,6 +137,7 @@ class Controller : public QObject {
     }
 
     const QString m_sDeviceName;
+    std::shared_ptr<PlayerManager> m_pPlayerManager;
     const RuntimeLoggingCategory m_logBase;
     const RuntimeLoggingCategory m_logInput;
     const RuntimeLoggingCategory m_logOutput;

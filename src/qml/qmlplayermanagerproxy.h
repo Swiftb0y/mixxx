@@ -4,7 +4,6 @@
 #include <QtQml>
 
 #include "mixer/playermanager.h"
-#include "qml/qmlplayerproxy.h"
 
 namespace mixxx {
 namespace qml {

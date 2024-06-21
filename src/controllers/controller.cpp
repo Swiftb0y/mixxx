@@ -15,10 +15,11 @@ QString loggingCategoryPrefix(const QString& deviceName) {
 }
 } // namespace
 
-Controller::Controller(const QString& deviceName)
+Controller::Controller(const QString& deviceName, std::shared_ptr<PlayerManager> pPlayerManager)
         : m_sDeviceName(deviceName),
           m_logBase(loggingCategoryPrefix(deviceName)),
           m_logInput(loggingCategoryPrefix(deviceName) + QStringLiteral(".input")),
+          m_pPlayerManager(std::move(pPlayerManager)),
           m_logOutput(loggingCategoryPrefix(deviceName) + QStringLiteral(".output")),
           m_pScriptEngineLegacy(nullptr),
           m_bIsOutputDevice(false),
@@ -44,7 +45,8 @@ void Controller::startEngine()
         qCWarning(m_logBase) << "Controller: Engine already exists! Restarting:";
         stopEngine();
     }
-    m_pScriptEngineLegacy = std::make_shared<ControllerScriptEngineLegacy>(this, m_logBase);
+    m_pScriptEngineLegacy = std::make_shared<ControllerScriptEngineLegacy>(
+            this, m_logBase, m_pPlayerManager);
     QObject::connect(m_pScriptEngineLegacy.get(),
             &ControllerScriptEngineBase::beforeShutdown,
             this,

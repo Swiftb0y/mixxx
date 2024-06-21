@@ -1,10 +1,13 @@
 #include "controllers/scripting/controllerscriptenginebase.h"
 
 #include <QJSEngine>
+#include <memory>
 
 #include "controllers/controller.h"
 #include "controllers/scripting/colormapperjsproxy.h"
 #include "errordialoghandler.h"
+#include "mixer/playermanager.h"
+#include "qml/qmlplayermanagerproxy.h"
 #ifdef MIXXX_USE_QML
 #include <QQmlEngine>
 #endif
@@ -15,10 +18,12 @@
 #endif
 #include "util/cmdlineargs.h"
 
-ControllerScriptEngineBase::ControllerScriptEngineBase(
-        Controller* controller, const RuntimeLoggingCategory& logger)
+ControllerScriptEngineBase::ControllerScriptEngineBase(Controller* controller,
+        const RuntimeLoggingCategory& logger,
+        std::shared_ptr<PlayerManager> pPlayerManager)
         : m_bDisplayingExceptionDialog(false),
           m_pJSEngine(nullptr),
+          m_pPlayerManager(std::move(pPlayerManager)),
           m_pController(controller),
           m_logger(logger),
           m_bAbortOnWarning(false),
@@ -83,6 +88,12 @@ bool ControllerScriptEngineBase::initialize() {
     QJSValue mapper = m_pJSEngine->newQMetaObject(
             &ColorMapperJSProxy::staticMetaObject);
     engineGlobalObject.setProperty("ColorMapper", mapper);
+
+    if (m_pPlayerManager) {
+        engineGlobalObject.setProperty("players",
+                m_pJSEngine->newQObject(new mixxx::qml::QmlPlayerManagerProxy(
+                        m_pPlayerManager)));
+    }
 
     if (m_pController) {
         qDebug() << "Controller in script engine is:"

@@ -21,8 +21,9 @@ class ControllerRenderingEngine;
 class ControllerScriptEngineLegacy : public ControllerScriptEngineBase {
     Q_OBJECT
   public:
-    explicit ControllerScriptEngineLegacy(
-            Controller* controller, const RuntimeLoggingCategory& logger);
+    explicit ControllerScriptEngineLegacy(Controller* controller,
+            const RuntimeLoggingCategory& logger,
+            std::shared_ptr<PlayerManager> pPlayerManager = nullptr);
     ~ControllerScriptEngineLegacy() override;
 
     bool initialize() override;

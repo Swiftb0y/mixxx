@@ -12,6 +12,7 @@
 #include "controllers/controllerenginethreadcontrol.h"
 #endif
 
+class PlayerManager;
 class Controller;
 class QJSEngine;
 #ifdef MIXXX_USE_QML
@@ -24,8 +25,9 @@ class TrackCollectionManager;
 class ControllerScriptEngineBase : public QObject {
     Q_OBJECT
   public:
-    explicit ControllerScriptEngineBase(
-            Controller* controller, const RuntimeLoggingCategory& logger);
+    explicit ControllerScriptEngineBase(Controller* controller,
+            const RuntimeLoggingCategory& logger,
+            std::shared_ptr<PlayerManager> pPlayerManager = nullptr);
     virtual ~ControllerScriptEngineBase() override = default;
 
     virtual bool initialize();
@@ -80,6 +82,7 @@ class ControllerScriptEngineBase : public QObject {
     bool m_bErrorsAreFatal;
 #endif
     std::shared_ptr<QJSEngine> m_pJSEngine;
+    std::shared_ptr<PlayerManager> m_pPlayerManager;
 
     Controller* m_pController;
     const RuntimeLoggingCategory m_logger;

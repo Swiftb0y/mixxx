@@ -44,8 +44,11 @@ const QByteArray kScreenShutdownFunctionSignature =
 #endif
 
 ControllerScriptEngineLegacy::ControllerScriptEngineLegacy(
-        Controller* controller, const RuntimeLoggingCategory& logger)
-        : ControllerScriptEngineBase(controller, logger) {
+        Controller* controller,
+        const RuntimeLoggingCategory& logger,
+        std::shared_ptr<PlayerManager> pPlayerManager = nullptr)
+        : ControllerScriptEngineBase(
+                  controller, logger, std::move(pPlayerManager)) {
     connect(&m_fileWatcher,
             &QFileSystemWatcher::fileChanged,
             this,
