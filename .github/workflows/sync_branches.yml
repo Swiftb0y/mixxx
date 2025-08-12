@@ -42,7 +42,7 @@ jobs:
       #     app-id: ${{ vars.MIXXX_BOT_APP_ID }}
 
       - name: "Check out repository"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           # PAT setup with content:write and pull_request:write
           token: ${{ secrets.MIXXX_BRANCH_SYNC_PAT }}
