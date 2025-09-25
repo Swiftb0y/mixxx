@@ -19,6 +19,7 @@
 #include "engine/enginexfader.h"
 #include "engine/sidechain/enginesidechain.h"
 #include "engine/sync/enginesync.h"
+#include "enginemixer.h"
 #include "mixer/playermanager.h"
 #include "moc_enginemixer.cpp"
 #include "preferences/configobject.h"
@@ -121,6 +122,8 @@ EngineMixer::EngineMixer(UserSettingsPointer pConfig,
                   ConfigKey(EngineXfader::kXfaderConfigKey, "xFaderReverse"))),
           m_pHeadSplitEnabled(std::make_unique<ControlPushButton>(
                   ConfigKey(group, "headSplit"), true, 0.0)),
+          m_pMainPfl(std::make_unique<ControlPushButton>(
+                  ConfigKey(kMainGroup, "pfl"))),
 
           m_pKeylockEngine(std::make_unique<ControlObject>(
                   ConfigKey(kAppGroup, QStringLiteral("keylock_engine")),
@@ -190,6 +193,8 @@ EngineMixer::EngineMixer(UserSettingsPointer pConfig,
 
     m_pHeadSplitEnabled->setButtonMode(mixxx::control::ButtonMode::Toggle);
     m_pHeadSplitEnabled->set(0.0);
+    m_pMainPfl->setButtonMode(mixxx::control::ButtonMode::Toggle);
+    m_pMainPfl->set(0.0);
 
     // zero out otherwise uninitialized buffers
     m_head.clear();
@@ -358,6 +363,24 @@ void EngineMixer::processChannels(std::size_t bufferSize) {
             });
 }
 
+EngineMixer::HeadphoneGains EngineMixer::getHeadphoneGains() const {
+    HeadphoneGains gains = {
+            .main = CSAMPLE_GAIN_ZERO,
+            .pfl = CSAMPLE_GAIN_ONE,
+    };
+    if (!m_pMainEnabled->toBool()) {
+        return gains;
+    }
+    const auto cf_val = static_cast<CSAMPLE_GAIN>(m_pHeadMix->get());
+    gains.pfl = 0.5f * (-cf_val + CSAMPLE_GAIN_ONE);
+    if (m_pMainPfl->toBool()) {
+        gains.main = 1;
+    } else {
+        gains.main = 0.5f * (cf_val + CSAMPLE_GAIN_ONE);
+    }
+    return gains;
+}
+
 void EngineMixer::process(const std::size_t bufferSize) {
     DEBUG_ASSERT(bufferSize <= static_cast<int>(kMaxEngineSamples));
 
@@ -384,20 +407,10 @@ void EngineMixer::process(const std::size_t bufferSize) {
     // Prepare all channels for output
     processChannels(bufferSize);
 
-    // Compute headphone mix
-    // Head phone left/right mix
-    CSAMPLE pflMixGainInHeadphones = 1;
-    CSAMPLE mainMixGainInHeadphones = 0;
-    if (mainEnabled) {
-        const auto cf_val = static_cast<CSAMPLE_GAIN>(m_pHeadMix->get());
-        pflMixGainInHeadphones = 0.5f * (-cf_val + 1.0f);
-        mainMixGainInHeadphones = 0.5f * (cf_val + 1.0f);
-        // qDebug() << "head val " << cf_val << ", head " << chead_gain
-        //          << ", main " << mainGain;
-    }
+    const auto headphoneGains = getHeadphoneGains();
 
     // Mix all the PFL enabled channels together.
-    m_headphoneGain.setGain(pflMixGainInHeadphones);
+    m_headphoneGain.setGain(headphoneGains.pfl);
 
     if (headphoneEnabled) {
         // Process effects and mix PFL channels together for the headphones.
@@ -571,7 +584,7 @@ void EngineMixer::process(const std::size_t bufferSize) {
             m_duckingGainOld = duckingGain;
 
             if (headphoneEnabled) {
-                processHeadphones(mainMixGainInHeadphones, bufferSize);
+                processHeadphones(headphoneGains.main, bufferSize);
             }
 
             // Copy main mix to booth output with booth gain before mixing
@@ -618,7 +631,7 @@ void EngineMixer::process(const std::size_t bufferSize) {
             m_duckingGainOld = duckingGain;
 
             if (headphoneEnabled) {
-                processHeadphones(mainMixGainInHeadphones, bufferSize);
+                processHeadphones(headphoneGains.main, bufferSize);
             }
 
             // Mix talkover with main
@@ -683,7 +696,7 @@ void EngineMixer::process(const std::size_t bufferSize) {
             m_duckingGainOld = duckingGain;
 
             if (headphoneEnabled) {
-                processHeadphones(mainMixGainInHeadphones, bufferSize);
+                processHeadphones(headphoneGains.main, bufferSize);
             }
 
             // Apply main gain

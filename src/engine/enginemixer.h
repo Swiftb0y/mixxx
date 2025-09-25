@@ -262,6 +262,13 @@ class EngineMixer : public QObject, public AudioSource {
             std::size_t bufferSize);
     bool sidechainMixRequired() const;
 
+    struct HeadphoneGains {
+        CSAMPLE_GAIN main;
+        CSAMPLE_GAIN pfl;
+    };
+
+    HeadphoneGains getHeadphoneGains() const;
+
     // non-owning. lifetime bound to EffectsManager
     EngineEffectsManager* m_pEngineEffectsManager;
 
@@ -318,6 +325,7 @@ class EngineMixer : public QObject, public AudioSource {
     std::unique_ptr<ControlPotmeter> m_pXFaderCalibration;
     std::unique_ptr<ControlPushButton> m_pXFaderReverse;
     std::unique_ptr<ControlPushButton> m_pHeadSplitEnabled;
+    std::unique_ptr<ControlPushButton> m_pMainPfl;
     std::unique_ptr<ControlObject> m_pKeylockEngine;
 
     PflGainCalculator m_headphoneGain;
